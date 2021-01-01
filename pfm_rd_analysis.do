@@ -17,10 +17,11 @@ ________________________________________________________________________________
 	set seed 1956
 
 	
-/* Run Prelim File _____________________________________________________________*/
+/* Run Prelim File _____________________________________________________________
 
 	*do "${user}/Documents/pfm_.master/00_setup/pfm_paths_master.do"
 	do "${code}/../pfm_radiodistribution/pfm_rd_prelim.do"
+*/
 	
 /* Load Data ___________________________________________________________________*/	
 
@@ -51,7 +52,7 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	hivknow
+		local index_list	hivstigma
 							;
 
 							;
@@ -140,6 +141,17 @@ ________________________________________________________________________________
 							hivknow_arv_nospread 
 							hivknow_transmit 
 							;
+			local hivdisclose	hivdisclose_index 
+							hivdisclose_fam 
+							hivdisclose_friend 
+							hivdisclose_cowork 
+							hivdisclose_secret 
+							;
+			local hivstigma hivstigma_index 
+							hivstigma_fired 
+							hivstigma_bus 
+							hivstigma_fired_norm 
+							;
 		/* Covariates */	
 		global cov_always	i.block_rd											// Covariates that are always included
 							i.treatment_group
@@ -190,12 +202,25 @@ ________________________________________________________________________________
 
 /* Sandbox _____________________________________________________________________*/
 
-if `sandbox' > 0 {
+*if `sandbox' > 0 {
 
-	*reg p_prej_kidmarry_nottz treat i.svy_enum ${cov_always}
+	estimates clear
+
+	foreach index of local index_list {
+
+		foreach var of local `index' {
+			xi : regress `var' treat ${cov_always}
+			estimates store sb_`var'
+		}
+		
+	}
+	
+	estimates table sb_*, keep(treat) b(%7.4f) se(%7.4f)  p(%7.4f) stats(N r2_a) varw(20)
+
+stop
 
 }
-
+stop
 
 /* Run for Each Index __________________________________________________________*/
 
