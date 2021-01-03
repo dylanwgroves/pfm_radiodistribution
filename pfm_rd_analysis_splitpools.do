@@ -17,11 +17,11 @@ ________________________________________________________________________________
 	set seed 1956
 
 	
-/* Run Prelim File _____________________________________________________________
+/* Run Prelim File _____________________________________________________________*/
+
 
 	*do "${user}/Documents/pfm_.master/00_setup/pfm_paths_master.do"
 	do "${code}/../pfm_radiodistribution/pfm_rd_prelim.do"
-*/
 	
 /* Load Data ___________________________________________________________________*/	
 
@@ -52,7 +52,20 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	ppref
+		local index_list	takeup
+							pint
+							healthknow
+							gender
+							ipv
+							fm 
+							em 
+							prej_nbr 
+							prej_marry 
+							prej_thermo 
+							values 
+							ppref
+							ppart
+							wpp 
 							;
 
 							;
@@ -119,23 +132,20 @@ ________________________________________________________________________________
 							prej_thermo_out_rel 
 							prej_thermo_out_eth
 							;
-		local values	 	/* Values */
+		local values	 /* Values */
 							values_tzortribe_dum
 							values_urbangood 
 							resp_urbanvisit
 							resp_religiosity
 							;
-		local ppref	   		/* Political Preferences */
+		local ppref	        /* Political Preferences */
 							values_dontquestion
 							ptixknow_trustnat 
 							ptixknow_trustloc
-							ptixknow_trustrel
 							ptixpref_local_approve
 							ptixpref_respnat
-							ptixpref_resploc
-							ptixpref_respcom
 							;
-		local ppart 		/* Political Participation */
+		local ppart 	    /* Political Participation */
 							ptixpart_villmeet
 							ptixpart_collact
 							ptixpart_vote
@@ -156,7 +166,7 @@ ________________________________________________________________________________
 							hivdisclose_cowork 
 							hivdisclose_secret 
 							;
-		local hivstigma 	hivstigma_index 
+		local hivstigma    	hivstigma_index 
 							hivstigma_fired 
 							hivstigma_bus 
 							hivstigma_fired_norm 
@@ -214,21 +224,31 @@ ________________________________________________________________________________
 if `sandbox' > 0 {
 
 	estimates clear
-
+	log using "${rd_tables}/pfm_rd_resultsbypool", replace
+	
 	foreach index of local index_list {
 
-		foreach var of local `index' {
-			xi : regress `var' treat ${cov_always} if sample == "ne"
-			estimates store sb_`var'
-		}
-		
+		foreach pool in as ne {
+			preserve 
+			keep if sample == "`pool'"
+				foreach var of local `index' {
+					cap qui xi : regress `var' treat ${cov_always}
+					cap estimates store s_`var'
+				}
+				
+				di "*** SAMPLE: `pool' ****, ***INDEX = `index'****"
+				
+				estimates table s_*, keep(treat) b(%7.4f) se(%7.4f)  p(%7.4f) stats(N r2_a) model(20)
+			restore
+			estimates clear
+			}
 	}
+	log close		
+}
 	
-	estimates table sb_*, keep(treat) b(%7.4f) se(%7.4f)  p(%7.4f) stats(N r2_a) varw(20) model(20)
-
 stop
 
-}
+
 stop
 
 /* Run for Each Index __________________________________________________________*/
