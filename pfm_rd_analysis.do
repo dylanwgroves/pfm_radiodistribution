@@ -30,14 +30,9 @@ ________________________________________________________________________________
 	
 /* Define Globals and Locals ___________________________________________________*/
 	#d ;
-	
-		/* Parnter Survey or No? */
-		local partner 		0													// set to 1 for partner survey
-							;
-		
 		
 		/* Sandbox */															// Set if you just want to see the immediate results without export
-		local sandbox		0
+		local sandbox		1
 							;
 		
 		
@@ -52,16 +47,8 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	ppref
+		local index_list	em
 							;
-
-							;
-		local takeup		/* Takeup */
-							rd_receive											// Fix for partner survey
-							rd_stillhave
-							radio_ever 
-							radio_listen 
-							radio_listen_hrs
 							;
 		local pint			/* Political Interest */
 							ptixpart_interest
@@ -221,7 +208,7 @@ if `sandbox' > 0 {
 	foreach index of local index_list {
 
 		foreach var of local `index' {
-			xi : regress `var' treat ${cov_always} if sample == "ne"
+			xi : regress `var' treat ${cov_always} i.svy_enum
 			estimates store sb_`var'
 		}
 		
@@ -232,6 +219,7 @@ if `sandbox' > 0 {
 stop
 
 }
+stop
 
 
 /* Run for Each Index __________________________________________________________*/
