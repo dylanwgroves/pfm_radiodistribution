@@ -34,6 +34,10 @@ ________________________________________________________________________________
 		/* Sandbox */															// Set if you just want to see the immediate results without export
 		local sandbox		1
 							;
+							
+		/* Partner */
+		local partner 		1
+							;
 		
 		
 		/* Rerandomization count */
@@ -47,14 +51,13 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	em
-							;
+		local index_list	prej_thermo
+		
 							;
 		local pint			/* Political Interest */
 							ptixpart_interest
 							radio_locleader 
 							radio_natleader 
-							radio_villreport
 							;
 		local healthknow 	/* Health Knowledge */
 							resp_ppe
@@ -98,6 +101,7 @@ ________________________________________________________________________________
 		local prej_marry 	prej_kidmarry_index
 							prej_kidmarry_nottribe 
 							prej_kidmarry_notrelig 
+							prej_kidmarry_nottz
 							prej_kidmarry_notrural 
 							;
 		local prej_thermo 	prej_thermo_city 
@@ -149,28 +153,10 @@ ________________________________________________________________________________
 							hivstigma_fired_norm 
 							;
 		/* Covariates */	
-		global cov_always	i.block_rd											// Covariates that are always included
-							i.treatment_group
+		global cov_always	i.block_rd
 							;					
 		/* Lasso Covariates */
-		global cov_lasso	resp_female 
-							resp_muslim 
-							b_resp_religiosity
-							b_values_likechange 
-							b_values_techgood 
-							b_values_respectauthority 
-							b_fm_reject
-							b_ge_raisekids 
-							b_ge_earning 
-							b_ge_leadership 
-							b_ge_noprefboy 
-							b_radio_any 
-							b_resp_lang_swahili 
-							b_resp_literate 
-							b_resp_standard7 
-							b_resp_married 
-							b_resp_hhh 
-							b_resp_numkid
+		local cov_lasso		
 							;
 		/* Statitistics of interest */
 		local stats_list 	coefficient											//1
@@ -197,9 +183,8 @@ ________________________________________________________________________________
 
 
 /* Sandbox _____________________________________________________________________*/
-stop
-xi: regression 
 
+gen values_tzonly_dum = (values_tzortribe == 1)
 
 
 if `sandbox' > 0 {
@@ -211,7 +196,7 @@ if `sandbox' > 0 {
 	foreach index of local index_list {
 
 		foreach var of local `index' {
-			xi : regress `var' treat ${cov_always} i.svy_enum
+			xi : regress prej_thermo_sambaa treat ${cov_always}
 			estimates store sb_`var'
 		}
 		
