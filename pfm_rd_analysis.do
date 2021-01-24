@@ -51,7 +51,7 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	prej_thermo
+		local index_list	hivknow
 		
 							;
 		local pint			/* Political Interest */
@@ -183,9 +183,6 @@ ________________________________________________________________________________
 
 
 /* Sandbox _____________________________________________________________________*/
-
-gen values_tzonly_dum = (values_tzortribe == 1)
-
 
 if `sandbox' > 0 {
 
