@@ -17,11 +17,11 @@ ________________________________________________________________________________
 	set seed 1956
 
 	
-/* Run Prelim File _____________________________________________________________
+/* Run Prelim File _____________________________________________________________*/
 
 	*do "${user}/Documents/pfm_.master/00_setup/pfm_paths_master.do"
 	do "${code}/../pfm_radiodistribution/pfm_rd_prelim.do"
-*/
+
 	
 /* Load Data ___________________________________________________________________*/	
 
@@ -32,16 +32,16 @@ ________________________________________________________________________________
 	#d ;
 		
 		/* Sandbox */															// Set if you just want to see the immediate results without export
-		local sandbox		1
+		local sandbox		0
 							;
 							
 		/* Partner */
-		local partner 		1
+		local partner 		0
 							;
 		
 		
 		/* Rerandomization count */
-		local rerandcount	500
+		local rerandcount	10
 							;
 			
 			
@@ -51,9 +51,31 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	hivknow
-		
+		local index_list	takeup
+							pint
+							healthknow
+							gender
+							ipv
+							fm 
+							em 
+							prej_nbr 
+							prej_marry 
+							prej_thermo 
+							values 
+							ppref 
+							ppart 
+							wpp 
+							hivknow 
+							hivdisclose 
+							hivstigma 
 							;
+		local takeup		/* Takeup */
+							rd_receive
+							rd_stillhave
+							radio_ever
+							radio_listen
+							radio_listen_hrs
+							;	
 		local pint			/* Political Interest */
 							ptixpart_interest
 							radio_locleader 
@@ -190,10 +212,10 @@ if `sandbox' > 0 {
 
 	estimates clear
 
-	foreach index of local index_list {
+	foreach index of varlist radio_type_* {
 
-		foreach var of local `index' {
-			xi : regress prej_thermo_sambaa treat ${cov_always}
+		foreach var of varlist radio_type_* {
+			xi : regress `var' treat i.block_rd 
 			estimates store sb_`var'
 		}
 		
@@ -204,7 +226,6 @@ if `sandbox' > 0 {
 stop
 
 }
-stop
 
 
 /* Run for Each Index __________________________________________________________*/
@@ -429,11 +450,11 @@ foreach index of local index_list {
 		/* Export */
 		if `partner' > 0 {
 			save "${data_rd}/`index'_partner", replace
-			export excel using "${rd_tables}/pfm_rd_rawresults_partner", sheet(`index') sheetreplace firstrow(variables)
+			export excel using "${rd_tables}/pfm_rd_rawresults_partner", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
 		}
 		if `partner' < 1 {
 			save "${data_rd}/`index'", replace
-			export excel using "${rd_tables}/pfm_rd_rawresults", sheet(`index') sheetreplace firstrow(variables)
+			export excel using "${rd_tables}/pfm_rd_rawresults", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
 		}
 		restore
 }
