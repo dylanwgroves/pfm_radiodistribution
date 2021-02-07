@@ -17,22 +17,23 @@ ________________________________________________________________________________
 	set seed 1956
 
 	
-/* Run Prelim File _____________________________________________________________*/
+/* Run Prelim File _____________________________________________________________
 
 	*do "${user}/Documents/pfm_.master/00_setup/pfm_paths_master.do"
 	do "${code}/../pfm_radiodistribution/pfm_rd_prelim.do"
 
+*/
 	
 /* Load Data ___________________________________________________________________*/	
 
 	use "${data_rd}/pfm_rd_analysis.dta", clear
-
+	
 	
 /* Define Globals and Locals ___________________________________________________*/
 	#d ;
 		
 		/* Sandbox */															// Set if you just want to see the immediate results without export
-		local sandbox		0
+		local sandbox		1
 							;
 							
 		/* Partner */
@@ -51,7 +52,11 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	takeup
+		local index_list	prej_nbr 
+							prej_marry 
+							prej_thermo 
+							/*List of Indices
+							takeup 
 							pint
 							healthknow
 							gender
@@ -67,11 +72,13 @@ ________________________________________________________________________________
 							wpp 
 							hivknow 
 							hivdisclose 
-							hivstigma 
+							hivstigma
+							*/
 							;
-		local takeup		/* Takeup */
+		local takeup		/* Takeup 
 							rd_receive
 							rd_stillhave
+							*/
 							radio_ever
 							radio_listen
 							radio_listen_hrs
@@ -167,18 +174,35 @@ ________________________________________________________________________________
 							hivdisclose_fam 
 							hivdisclose_friend 
 							hivdisclose_cowork 
-							hivdisclose_secret 
+							hivdisclose_nosecret 
 							;
 		local hivstigma 	hivstigma_index 
-							hivstigma_fired 
-							hivstigma_bus 
-							hivstigma_fired_norm 
+							hivstigma_notfired 
+							hivstigma_yesbus 
+							hivstigma_notfired_norm 
 							;
 		/* Covariates */	
-		global cov_always	i.block_rd
+		global cov_always	i.id_village_c
 							;					
 		/* Lasso Covariates */
-		local cov_lasso		
+		global cov_lasso	resp_female 
+							resp_muslim 
+							b_resp_religiosity
+							b_values_likechange 
+							b_values_techgood 
+							b_values_respectauthority 
+							b_fm_reject
+							b_ge_raisekids 
+							b_ge_earning 
+							b_ge_leadership 
+							b_ge_noprefboy 
+							b_radio_any 
+							b_resp_lang_swahili 
+							b_resp_literate 
+							b_resp_standard7 
+							b_resp_married 
+							b_resp_hhh 
+							b_resp_numkid
 							;
 		/* Statitistics of interest */
 		local stats_list 	coefficient											//1
@@ -212,9 +236,9 @@ if `sandbox' > 0 {
 
 	estimates clear
 
-	foreach index of varlist radio_type_* {
+	foreach index of local index_list {
 
-		foreach var of varlist radio_type_* {
+		foreach var of local `index' {
 			xi : regress `var' treat i.block_rd 
 			estimates store sb_`var'
 		}
@@ -271,7 +295,6 @@ foreach index of local index_list {
 			local varnames `varnames' `varname'   
 			*local varlabs `varlabs' `varlab' 
 
-			
 	/* Lasso Regression  ___________________________________________________________*/
 
 		qui lasso linear `dv' ${cov_lasso}											// Select best preidctors of outcome, store variables and number of variables
@@ -401,10 +424,10 @@ foreach index of local index_list {
 			restore
 		
 		/* Save variable summaries */
-			mat R[`i',14]= `treat_mean'    											// treat mean
-			mat R[`i',15]= `treat_sd'    											// treat sd		
-			mat R[`i',16]= `control_mean'    										// control mean
-			mat R[`i',17]= `control_sd'    											// control mean
+			mat R[`i',14]= `control_mean'    											// treat mean
+			mat R[`i',15]= `control_sd'    											// treat sd		
+			mat R[`i',16]= `treat_mean'    										// control mean
+			mat R[`i',17]= `treat_sd'    											// control sd
 			mat R[`i',18]= `min'  													// min
 			mat R[`i',19]= `max'  													// max
 
