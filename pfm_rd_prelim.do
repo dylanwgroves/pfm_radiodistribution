@@ -57,25 +57,6 @@ ________________________________________________________________________________
 	
 /* Outcomes ____________________________________________________________________*/
 
-	/* Trust */
-	gen ptixknow_trustnat = (ptixknow_sourcetrust == 2)
-		replace ptixknow_trustnat = . if ptixknow_sourcetrust == .
-	
-		gen p_ptixknow_trustnat = (p_ptixknow_sourcetrust == 2)
-		replace p_ptixknow_trustnat = . if p_ptixknow_sourcetrust == .
-	
-	gen ptixknow_trustloc = (ptixknow_sourcetrust == 1)
-		replace ptixknow_trustloc = . if ptixknow_sourcetrust == .
-		
-		gen p_ptixknow_trustloc = (p_ptixknow_sourcetrust == 1)
-		replace p_ptixknow_trustloc = . if p_ptixknow_sourcetrust == .
-		
-	gen ptixknow_trustrel = (ptixknow_sourcetrust == 3)
-		replace ptixknow_trustrel = . if ptixknow_sourcetrust == .
-		
-		gen p_ptixknow_trustrel = (p_ptixknow_sourcetrust == 3)
-		replace p_ptixknow_trustrel = . if p_ptixknow_sourcetrust == .
-	
 	/* Responsibility for Dev */
 	gen ptixpref_respnat = (ptixpref_responsibility == 4)
 		replace ptixpref_respnat = . if ptixpref_responsibility == .

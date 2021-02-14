@@ -17,23 +17,30 @@ ________________________________________________________________________________
 	set seed 1956
 
 	
-/* Run Prelim File _____________________________________________________________
+/* Run Prelim File _____________________________________________________________*/
 
 	*do "${user}/Documents/pfm_.master/00_setup/pfm_paths_master.do"
 	do "${code}/../pfm_radiodistribution/pfm_rd_prelim.do"
 
-*/
+
 	
 /* Load Data ___________________________________________________________________*/	
 
 	use "${data_rd}/pfm_rd_analysis.dta", clear
-	
+
+	encode id_village_uid, gen (id_village_uid_c)
+
+	*keep if p_resp_age != .													// Some Don requests
+	*keep if p_resp_age == .
+	*keep if sample == "as"
+	keep if sample == "ne"
+
 	
 /* Define Globals and Locals ___________________________________________________*/
 	#d ;
 		
 		/* Sandbox */															// Set if you just want to see the immediate results without export
-		local sandbox		1
+		local sandbox		0
 							;
 							
 		/* Partner */
@@ -42,7 +49,7 @@ ________________________________________________________________________________
 		
 		
 		/* Rerandomization count */
-		local rerandcount	10
+		local rerandcount	1
 							;
 			
 			
@@ -52,10 +59,8 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	prej_nbr 
-							prej_marry 
-							prej_thermo 
-							/*List of Indices
+		local index_list	wpp
+							/* Options 
 							takeup 
 							pint
 							healthknow
@@ -108,7 +113,7 @@ ________________________________________________________________________________
 							;
 		local fm 			fm_reject
 							fm_reject_long
-							fm_partner
+							/*fm_partner*/
 							;
 		local em 			em_reject_index
 							em_reject_religion_dum 
@@ -117,8 +122,10 @@ ________________________________________________________________________________
 							em_reject_money_dum 
 							em_record_reject
 							em_record_shareany
+							/*
 							em_report
 							em_norm_reject_dum
+							*/
 							;
 		local prej_nbr		/* Prejudice */
 							prej_yesnbr_index 
@@ -163,7 +170,7 @@ ________________________________________________________________________________
 		local wpp 			wpp_attitude_dum 
 							wpp_norm_dum 
 							wpp_behavior 
-							wpp_partner
+							/*wpp_partner*/
 							;
 		local hivknow		hivknow_index 
 							hivknow_arv_survive 
@@ -182,7 +189,8 @@ ________________________________________________________________________________
 							hivstigma_notfired_norm 
 							;
 		/* Covariates */	
-		global cov_always	i.id_village_c
+		global cov_always	i.id_village_uid_c									// For partner
+							/*i.block_rd*/
 							;					
 		/* Lasso Covariates */
 		global cov_lasso	resp_female 
@@ -200,10 +208,37 @@ ________________________________________________________________________________
 							b_resp_lang_swahili 
 							b_resp_literate 
 							b_resp_standard7 
-							b_resp_married 
 							b_resp_hhh 
 							b_resp_numkid
 							;
+							
+		/* Lasso Covariates - Partner */
+		global cov_lasso_partner	p_resp_age 
+									p_resp_female 
+									p_resp_muslim
+									b_resp_religiosity
+									b_values_likechange 
+									b_values_techgood 
+									b_values_respectauthority 
+									b_values_trustelders
+									b_fm_reject
+									b_ge_raisekids 
+									b_ge_earning 
+									b_ge_leadership 
+									b_ge_noprefboy 
+									b_media_tv_any 
+									b_media_news_never 
+									b_media_news_daily 
+									b_radio_any 
+									b_resp_lang_swahili 
+									b_resp_literate 	
+									b_resp_standard7 
+									b_resp_nevervisitcity 
+									b_resp_married 
+									b_resp_hhh 
+									b_resp_numkid
+									b_fm_reject
+									;
 		/* Statitistics of interest */
 		local stats_list 	coefficient											//1
 							se													//2
@@ -297,7 +332,13 @@ foreach index of local index_list {
 
 	/* Lasso Regression  ___________________________________________________________*/
 
-		qui lasso linear `dv' ${cov_lasso}											// Select best preidctors of outcome, store variables and number of variables
+		if `partner' > 0 {
+			qui lasso linear `dv' ${cov_lasso_partner}
+		}
+		if `partner' < 1 {
+			qui lasso linear `dv' ${cov_lasso}
+		}
+		
 			local lassovars = e(allvars_sel)										
 			local lassovars_num  = e(k_nonzero_sel)
 
@@ -477,7 +518,11 @@ foreach index of local index_list {
 		}
 		if `partner' < 1 {
 			save "${data_rd}/`index'", replace
-			export excel using "${rd_tables}/pfm_rd_rawresults", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
+			*export excel using "${rd_tables}/pfm_rd_rawresults", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
+			export excel using "${rd_tables}/pfm_rd_rawresults_ne", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
+			*export excel using "${rd_tables}/pfm_rd_rawresults_as", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
+			*export excel using "${rd_tables}/pfm_rd_rawresults_pplwNOpartners", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
+			*export excel using "${rd_tables}/pfm_rd_rawresults_pplwpartners", sheet(`index') sheetreplace firstrow(variables) keepcellfmt
 		}
 		restore
 }
