@@ -18,8 +18,8 @@ ________________________________________________________________________________
 	
 /* Run Prelim File _____________________________________________________________*/	
 
-	*do "${user}/Documents/pfm_.master/00_setup/pfm_paths_master.do"
-	do "${code}/../pfm_radiodistribution/pfm_rd_prelim_balance.do"
+	*do "${code}/pfm_.master/00_setup/pfm_paths_master.do"
+	do "${code}/pfm_radiodistribution/pfm_rd_prelim_balance.do"
 
 	
 /* Load Data ___________________________________________________________________*/	
