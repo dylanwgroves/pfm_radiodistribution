@@ -57,30 +57,7 @@ ________________________________________________________________________________
 	
 /* Outcomes ____________________________________________________________________*/
 
-	/* Responsibility for Dev */
-	gen ptixpref_respnat = (ptixpref_responsibility == 4)
-		replace ptixpref_respnat = . if ptixpref_responsibility == .
 		
-		gen p_ptixpref_respnat = (p_ptixpref_responsibility == 4)
-		replace p_ptixpref_respnat = . if p_ptixpref_responsibility == .
-		
-	gen ptixpref_resploc = (ptixpref_responsibility == 2)
-		replace ptixpref_respnat = . if ptixpref_responsibility == .
-		
-		gen p_ptixpref_resploc = (p_ptixpref_responsibility == 2)
-		replace p_ptixpref_resploc = . if p_ptixpref_responsibility == .
-		
-	gen ptixpref_respcom = (ptixpref_responsibility == 1)
-		replace ptixpref_respcom = . if ptixpref_responsibility == .
-		
-		gen p_ptixpref_respcom = (p_ptixpref_responsibility == 1)
-		replace p_ptixpref_respcom = . if p_ptixpref_responsibility == .
-		
-		
-	/* Prejudice */
-	rename prej_yesneighbor_*	prej_yesnbr_*
-		
-		rename p_prej_yesneighbor_*	p_prej_yesnbr_*
 	
 /* Filling Missing Baseline Values _____________________________________________*/
 
