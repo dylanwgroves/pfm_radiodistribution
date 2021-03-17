@@ -42,12 +42,14 @@ ________________________________________________________________________________
 		/* Sandbox */															// Set if you just want to see the immediate results without export
 		local sandbox		0
 							;
-							
+		
+	
+		
 		/* Survey Type */
-		local survey 		partner
+		local survey 		main
 							;
 							/*
-							main
+							
 							partner
 							friend
 							kid
@@ -64,8 +66,23 @@ ________________________________________________________________________________
 							
 			
 		/* Indices */		
-		local index_list	takeup
+		local index_list	takeup 
 							pint
+							healthknow
+							gender
+							ipv
+							fm 
+							em 
+							prej_nbr 
+							prej_marry 
+							prej_thermo 
+							values 
+							ppref 
+							ppart 
+							wpp 
+							hivknow 
+							hivdisclose 
+							hivstigma
 							/* Options 
 							takeup 
 							pint
