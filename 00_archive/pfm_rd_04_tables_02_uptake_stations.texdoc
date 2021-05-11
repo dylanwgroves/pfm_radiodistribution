@@ -1,0 +1,123 @@
+/* Basics ______________________________________________________________________
+
+Project: Wellspring Tanzania, Natural Experiment
+Purpose: Analysis
+Author: dylan groves, dylanwgroves@gmail.com
+Date: 2020/12/23
+________________________________________________________________________________*/
+
+
+/* Introduction ________________________________________________________________*/
+	
+	clear all	
+	clear matrix
+	clear mata
+	set more off
+	global c_date = c(current_date)
+	tempfile dta_main 
+	tempfile dta_vill
+
+/* Run Prelim File _____________________________________________________________	
+
+	do "${code}/pfm_.master/00_setup/pfm_paths_master.do"
+	do "${code}/pfm_ne/pfm_ne_prelim.do"
+*/
+
+/* Load Data ___________________________________________________________________*/	
+
+	import excel "${rd_tables}/pfm_rd_analysis.xlsx", sheet("radiotype") firstrow clear
+	save `dta_main', replace
+	
+	
+/* Sort Data ___________________________________________________________________*/
+
+	/* Individual Data */
+	sort pval
+	destring 	variable variablelabel coef se pval r2 N ///
+				lasso_coef lasso_se lasso_pval lasso_r2 lasso_N lasso_ctls lasso_ctls_num ///
+				treat_mean treat_sd ctl_mean ctl_sd vill_sd min max, replace
+	save `dta_main', replace
+
+	
+/* Create Rank _________________________________________________________________*/
+
+	/* Individual Data */
+	local sumstat_vars 	stations_tbc stations_uhuru  ///
+						stations_tk  stations_voa stations_rone ///
+						radio_type_music radio_type_sports radio_type_news ///
+						radio_type_social radio_type_relig
+
+	gen rank = .
+	local i = 1
+	
+	foreach var of local sumstat_vars {
+		replace rank = `i' if variable == "`var'"
+		local i = `i' + 1
+	}		   
+
+	drop if rank == .
+	gsort rank
+
+
+/* Create variables ____________________________________________________________*/
+
+	count
+	global count = `r(N)'
+	
+	forval i = 1/$count {
+
+		global var`i' = variablelabel[`i']
+		global b`i' = strofreal(coef[`i'], "%6.3f")
+		global se`i' = strofreal(se[`i'], "%6.3f")
+		global p`i' = strofreal(pval[`i'], "%6.3f")
+		global c`i' = strofreal(ctl_mean[`i'], "%6.2f")
+		global sd`i' = strofreal(ctl_sd[`i'], "%6.2f")
+		global mn`i' = strofreal(min[`i'], "%6.0f")
+		global mx`i' = strofreal(max[`i'], "%6.0f")
+		global r2`i' = strofreal(r2[`i'], "%6.2f")
+		global n`i' = strofreal(N[`i'], "%6.0fc")
+	
+	}
+	
+	/* Assign stars and set p-value to <0.001 instead of 0.000 */
+	do "${code}/pfm_ne/pfm_ne_00b_programs_stars.do"
+
+
+/* Make Table __________________________________________________________________*/
+
+texdoc init "${ne_clean_tables}/pfm_ne_tables_uptake_nonpfm.tex", replace nolog
+
+texdoc write 	{
+texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+texdoc write 	\begin{tabular}{l*{11}{c}}
+texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	 	 	
+texdoc write   								&\multicolumn{5}{c}{Radio Stations}																		&\multicolumn{5}{c}{Radio Types} 																		\tstrut \bstrut \\ \cmidrule(r){2-6} \cmidrule(l){7-11}
+		
+texdoc write        	     				& $var1 			& $var2			& $var3 		& $var4			& $var5 		& $var6			& $var7 		& $var8 		& $var9 		& $var10 				\tstrut \bstrut \\
+texdoc write 	\hline
+texdoc write 	Pangani-FM       			& $b1\sym{$s1}  	& $b2\sym{$s2} & $b3\sym{$s3} & $b4\sym{$s4} & $b5\sym{$s5} & $b6\sym{$s6}	& $b7\sym{$s7} & $b8\sym{$s9} & $b9\sym{$s9}	& $b10\sym{$s10} 	\\
+texdoc write    Standard Error 				& $se1				& $se2			& $se3    		& $se4  		& $se5 			& $se6			& $se7 			& $se8			& $se9			& $se10  		   		\\
+texdoc write 	\hline
+texdoc write 	\$ p\$-value 				& $p1				& $p2 			& $p3			& $p4			& $p5  			& $p6			& $p7			& $p8			& $p9			& $p10				\\
+texdoc write 	Hypothesis					& Two-sided			& Two-sided 	& Two-sided		& Two-sided 	& Two-sided		& Two-sided		& \Two-sided	& Two-sided		& Two-sided		& Two-sided				\\
+texdoc write 	Control Mean      			& $c1				& $c2			& $c3			& $c4			& $c5  			& $c6			& $c7			& $c8			& $c9			& $c10				\\
+texdoc write 	Village SD (control) 		& $sd1				& $sd2			& $sd3			& $sd4			& $sd5 			& $sd6			& $sd7			& $sd8			& $sd9			& $sd10				\\
+texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3]	& [$mn4-$mx4]	& [$mn5-$mx5] & [$mn6-$mx6]	& [$mn7-$mx7]	& [$mn9-$mx8]	& [$mn9-$mx9] & [$mn10-$mx10]	\\	
+texdoc write 	Blocked FE 					& Yes 				& Yes 			&  Yes   		& Yes  			& Yes			& Yes			& Yes			& Yes			& Yes			& Yes					\\
+texdoc write 	Controls 					& No 				& No 			&  No   		& No  			& No			& No 			& No			& No			& No			& No					\\
+texdoc write 	Adj-\$ R^2\$				& $r21 				& $r22 			& $r23   		& $r24 			& $r25			& $r26			& $r27			& $r28			& $r29			& $r210	 			\\
+texdoc write 	Observations      			& $n1 				& $n2 			& $n3   		& $n4 			& $n5			& $n6			& $n7			& $n8			& $n9			& $n10       			\\
+texdoc write 	\Xhline{2\arrayrulewidth}
+texdoc write 	\end{tabular}
+texdoc write 	}
+
+texdoc close
+
+
+
+
+
+
+
+
+

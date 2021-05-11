@@ -1,0 +1,155 @@
+/* Basics ______________________________________________________________________
+
+Project: Wellspring Tanzania, Natural Experiment
+Purpose: Analysis
+Author: dylan groves, dylanwgroves@gmail.com
+Date: 2020/12/23
+________________________________________________________________________________*/
+
+
+/* Introduction ________________________________________________________________*/
+	
+	clear all	
+	clear matrix
+	clear mata
+	set more off
+	global c_date = c(current_date)
+	tempfile dta_main 
+	
+/* Run Prelim File _____________________________________________________________	
+
+	do "${code}/pfm_.master/00_setup/pfm_paths_master.do"
+	do "${code}/pfm_rd/pfm_rd_prelim.do"
+*/
+
+/* Load Data ___________________________________________________________________*/	
+
+	import excel "${rd_tables}/pfm_rd_balance.xlsx", sheet("Sheet1") firstrow clear
+	save `dta_main', replace
+
+	
+/* Sort Data ___________________________________________________________________*/
+
+	/* Individual Data */
+	use `dta_main', clear
+	sort pval
+	destring treatmean treatsd controlmean samplemean controlsd coef pval ripval min max N, replace
+	gen village = 0
+	save `dta_main', replace
+
+	
+/* Create Rank _________________________________________________________________*/
+
+	/* Individual Data */
+	#d ;
+	local sumstat_vars 	resp_age 
+						resp_female
+						b_resp_standard7
+						resp_muslim 
+						b_resp_religiosity
+						b_ge_index 
+						b_values_likechange 
+						b_radio_any
+						b_asset_cell 
+						b_asset_tv 
+						;
+	#d cr
+
+	gen rank = .
+	local i = 1
+	
+	foreach var of local sumstat_vars {
+		replace rank = `i' if variable == "`var'"
+		local i = `i' + 1
+	}		   
+
+	drop if rank == .
+	gsort -village rank
+
+
+/* Create variables ___________________________________________________________________*/
+
+	count
+	local count = `r(N)'
+	
+	forval i = 1/`count' {
+
+		local ind_n = strofreal(N[1], "%6.0fc" numeric)
+		
+		local var_`i' = variablelabel[`i']
+		local t_mean_`i' = strofreal(treatmean[`i'], "%6.2fc" numeric)
+		local c_mean_`i' = strofreal(controlmean[`i'], "%6.2fc" numeric)
+		local s_mean_`i' = strofreal(samplemean[`i'], "%6.2fc" numeric)
+		local pval_`i' = strofreal(ripval[`i'], "%6.2fc" numeric)
+		*local n_`i' = strofreal(N[`i'], "%6.0fc")
+	
+	}
+	
+	
+/* Load pval ___________________________________________________________________*/
+
+texdoc init "${rd_clean_tables}/pfm_rd_tables_02_samplesummary.tex", replace nolog
+
+texdoc write 	{
+texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+texdoc write 	\begin{tabular}{l *{4}{d{3.3}} }
+texdoc write 	\hline
+texdoc write    \multicolumn{1}{c}{\text{Variable}} & \multicolumn{1}{c}{\text{Received Radio}} 	& \multicolumn{1}{c}{\text{No Radio}} 	& \multicolumn{1}{c}{\text{RI \$p\$-value}}  \\
+texdoc write 	\hline
+texdoc write 	\multicolumn{4}{c}{\text{Individual-Level Covariates (n = `ind_n')}} \tstrut \bstrut \\
+texdoc write 	\hline
+texdoc write 	\text{`var_1'}						&	`t_mean_1'				& `c_mean_1'				& `pval_1'				\\
+texdoc write 	\text{`var_2'}       				&	`t_mean_2'				& `c_mean_2'				& `pval_2'				\\
+texdoc write 	\text{`var_3'}     					&	`t_mean_3'				& `c_mean_3'				& `pval_3'				\\
+texdoc write 	\text{`var_4'}	      				&	`t_mean_4'				& `c_mean_4'				& `pval_4'				\\
+texdoc write 	\text{`var_5'}     					&	`t_mean_5'				& `c_mean_5'				& `pval_5'				\\
+texdoc write 	\text{`var_6'}	       				&	`t_mean_6'				& `c_mean_6'				& `pval_6'				\\
+texdoc write 	\text{`var_7'}	       				&	`t_mean_7'				& `c_mean_7'				& `pval_7'				\\
+texdoc write 	\text{`var_8'}	       				&	`t_mean_8'				& `c_mean_8'				& `pval_8'				\\
+texdoc write 	\text{`var_9'} 	      				&	`t_mean_9'				& `c_mean_9'				& `pval_9'				\\
+texdoc write 	\text{`var_10'}       				&	`t_mean_10'				& `c_mean_10'				& `pval_10'				\\
+texdoc write 	\hline
+
+texdoc write 	\end{tabular}
+texdoc write 	}
+
+texdoc close
+
+
+/*
+texdoc write 	{
+texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+texdoc write 	\begin{tabular}{l *{3}{d{2.2}} }
+texdoc write 	\hline 
+texdoc write    \multicolumn{1}{c}{\text{Variable}} & \multicolumn{1}{c}{\text{Treatment}} 	& \multicolumn{1}{c}{\text{Control}} \tstrut \bstrut  \\ 
+texdoc write 	\hline  
+texdoc write 	\text{`var_1'}						&	`t_mean_1'										& `c_mean_1'									\\
+texdoc write 	\text{`var_2'}       				&	`t_mean_2'										& `c_mean_2'									\\
+texdoc write 	\text{`var_3'}     					&	`t_mean_3'										& `c_mean_3'									\\
+texdoc write 	\text{`var_4'}	      				&	`t_mean_4'										& `c_mean_4'									\\
+texdoc write 	\text{`var_5'}	      				&	`t_mean_5'										& `c_mean_5'									\\
+texdoc write 	\text{`var_6'}	      				&	`t_mean_6'										& `c_mean_6'									\\ 
+texdoc write 	\text{`var_7'}	       				&	`t_mean_7'										& `c_mean_7'									\\
+texdoc write 	\text{`var_8'}	       				&	`t_mean_8'										& `c_mean_8'									\\
+texdoc write 	\text{`var_9'} 	      				&	`t_mean_9'										& `c_mean_9'									\\
+texdoc write 	\text{`var_10'}       				&	`t_mean_10'										& `c_mean_10'									\\
+texdoc write 	\hline
+texdoc write 	\end{tabular}
+texdoc write 	}
+
+texdoc close
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
