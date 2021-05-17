@@ -18,8 +18,8 @@ ________________________________________________________________________________
 /* Run Prelim File _____________________________________________________________*/
 
 	*do "${code}/pfm_.master/00_setup/pfm_paths_master.do"
-	do "${code}/pfm_radiodistribution/pfm_rd_prelim.do"
-	do "${code}/pfm_radiodistribution/02_indices/pfm_rd_indices_main.do"
+	do "${code}/pfm_audioscreening/pfm_as_prelim.do"
+	do "${code}/pfm_audioscreening/pfm_indices/pfm_as_indices_main.do"
 
 
 /* Load Data ___________________________________________________________________*/	
@@ -55,7 +55,7 @@ ________________________________________________________________________________
 		
 	/* Set Put Excel File Name */
 	putexcel clear
-	putexcel set "${rd_tables}/pfm_rd_balance.xlsx", replace 
+	putexcel set "${as_tables}/pfm_as_balance.xlsx", replace 
 	
 	putexcel A1 = ("variable")
 	putexcel B1 = ("variablelabel")
@@ -120,7 +120,7 @@ ________________________________________________________________________________
 			global n 	= e(N) 				//N
 			
 		/* RI */
-		do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_ri_balance.do"
+		do "${code}/pfm_audioscreening/01_helpers/pfm_as_helper_ri_balance.do"
 		global ripval = ${helper_ripval}
 			
 			/* Put excel */

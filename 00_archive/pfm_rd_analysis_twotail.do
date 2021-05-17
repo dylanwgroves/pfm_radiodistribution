@@ -20,7 +20,7 @@ ________________________________________________________________________________
 /* Run Prelim File _____________________________________________________________*/
 
 	*do "${code}/pfm_.master/00_setup/pfm_paths_master.do"
-	*do "${code}/pfm_radiodistribution/pfm_rd_prelim.do"
+	do "${code}/pfm_radiodistribution/pfm_rd_prelim.do"
 
 
 /* Load Data ___________________________________________________________________*/	
@@ -28,17 +28,19 @@ ________________________________________________________________________________
 	use "${data_rd}/pfm_rd_analysis.dta", clear
 	encode id_village_uid, gen(id_village_uid_c)
 	
+	reg ipv_norm_rej treat i.block_rd if sample == "ne"
+	stop
 
 /* Define Parameters ___________________________________________________*/
 
 	#d ;
 		
 		/* set seed */
-		set seed 			1956
+		set seed 			1957
 							;
 							
 		/* rerandomization count */
-		global rerandcount	100
+		global rerandcount	500
 							;
 		
 		/* survey */
@@ -53,11 +55,13 @@ ________________________________________________________________________________
 					
 		/* Indices */			
 		local index_list	
-							uptake
+							ppref
 							/*
 							takeup
 							stations
 							topics
+							pint
+							healthknow
 							gender
 							wpp
 							ipv
@@ -66,11 +70,13 @@ ________________________________________________________________________________
 							prej_marry
 							prej_thermo
 							values
-							pint
 							ppart
 							ppref
 							pknow
-							healthknow
+
+							hivknow
+							hivdisclose
+							hivstigma
 							*/
 							;
 	#d cr
@@ -80,9 +86,9 @@ ________________________________________________________________________________
 
 	do "${code}/pfm_radiodistribution/02_indices/pfm_rd_indices_${survey}.do"
 	do "${code}/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
-	do "${code}/pfm_radiodistribution/02_indices/pfm_rd_twosided.do"
 
-/* Run for Each Index __________________________________________________________*/
+
+/* Run for Each Index __________________________________________________________
 
 foreach index of local index_list {
 
@@ -98,9 +104,8 @@ foreach index of local index_list {
 	macro drop helper_pval
 	macro drop helper_ripval
 	macro drop helper_lasso_ripval
-	
-	macro drop test
-	
+*/
+
 	/* Define Matrix _______________________________________________________________*/
 				
 		/* Set Put Excel File Name */
@@ -132,8 +137,7 @@ foreach index of local index_list {
 		qui putexcel W1 = ("max")
 		qui putexcel X1 = ("lasso_ctls_replacement")
 		qui putexcel Y1 = ("lasso_ctls_num_replacement")
-		qui putexcel Z1 = ("test")
-
+		
 	
 	/* Summary Stats ___________________________________________________________*/
 
@@ -144,14 +148,6 @@ foreach index of local index_list {
 		
 		/* variable */
 		global dv `dv'
-		
-		/* set test */
-		if strpos("$twosided", "`dv'") { 
-			global test twosided
-		} 
-			else {
-				global test onesided
-			}
 		
 		/* Variable name */
 		qui ds `dv'
@@ -194,16 +190,15 @@ foreach index of local index_list {
 			global t 	= table[3,1]		//pval
 			global r2 	= `e(r2_a)' 		//r-squared
 			global n 	= e(N) 				//N
-			global df 	= e(df_r)
 			
-			/* Calculate pvalue */
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval.do"
-			global pval = ${helper_pval}
+			/* Calculate one-sided pvalue */
+			global pval = 2*ttail(e(df_r),abs(${t})) 
 			
 			/* Calculate RI-pvalue */
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri.do"
+			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_ri.do"
 			global ripval = ${helper_ripval}
 
+		
 	/* Lasso Regression  ___________________________________________________________*/
 
 		qui lasso linear `dv' ${cov_lasso}										// set this up as a separate do file
@@ -230,20 +225,25 @@ foreach index of local index_list {
 			global lasso_t 		= table[3,1]		//pval
 			global lasso_r2 	= `e(r2_a)' 		//r-squared
 			global lasso_n 		= e(N) 				//N			
-			global lasso_df 	= e(df_r)
-
+			
 			/* Calculate one-sided pvalue */				
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_lasso.do"
-			global lasso_pval = ${helper_lasso_pval}
+			global lasso_pval = 2*ttail(e(df_r),abs(${lasso_t})) 
 			
 			/* Calculate Lasso RI-pvalue */
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri_lasso.do"
+			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_ri_lasso.do"
 			global lasso_ripval = ${helper_lasso_ripval}
+
+			di "****************************************"
+			di "*** Variable is `dv'"
+			di "*** coef is `lasso_coef'"
+			di "*** pval is `pval'"
+			di "*** ripval is `lasso_rip_count' / `rerandcount'	"
+			
 		
 	/* Export to Excel _________________________________________________________*/ 
 		
-		di "Variable is ${varname}, coefficient is ${coef}, pval is ${pval} / ripval is ${ripval}, N = ${n}"
-		di "LASSO: Variable is ${varname}, coefficient is ${lasso_coef}, lasso pval is ${lasso_pval} / lasso ripval is ${lasso_ripval}, N = ${lasso_n}"
+		di "Variable is ${varname}, coefficient is ${coef}, pval is ${pval}, N = ${n}"
+		di "LASSO: Variable is ${varname}, coefficient is ${lasso_coef}, pval is ${lasso_pval}, N = ${lasso_n}"
 		di "LASSO vars were ${lasso_ctls}"
 
 		qui putexcel A`row' = ("${varname}")
@@ -271,7 +271,6 @@ foreach index of local index_list {
 		qui putexcel W`row' = ("${max}")
 		qui putexcel X`row' = ("${lasso_ctls_replacement}")
 		qui putexcel Y`row' = ("${lasso_ctls_num_replacement}")
-		qui putexcel Z`row' = ("${test}")
 		
 		/* Update locals ___________________________________________________________*/
 		
