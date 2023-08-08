@@ -82,8 +82,9 @@ ________________________________________________________________________________
 							crime_local_short
 							crime_femtravel_short 
 							crime_femboda_short
-							ptixpref_rank_crime
-							ptixpart_raiseissue
+							ptixpref_rank_crime_short
+							gbv_testify 
+							gbv_response_gov
 							;
 							
 		global gender		/* Gender Equality */
@@ -94,7 +95,8 @@ ________________________________________________________________________________
 							ge_school
 							;
 							
-		global ipv 			ipv_reject_long_disobey
+		global ipv 			ipv_reject_index
+							ipv_rej_disobey_long
 							ipv_reject_long_gossip
 							;
 							/* 							
@@ -129,6 +131,8 @@ ________________________________________________________________________________
 							prej_yesnbr_homo 
 							prej_yesnbr_alcoholic 
 							prej_yesnbr_unmarried 
+							prej_yesnbr_albino
+							prej_yesnbr_hiv
 							;
 							
 		global prej_marry 	prej_kidmarry_index
@@ -163,8 +167,9 @@ ________________________________________________________________________________
 							wpp_attitude_dum 
 							wpp_norm_dum 
 							wpp_behavior 
-							wpp_behavior_self
+							wpp_behavior_self_short
 							wpp_behavior_wife
+							wpp_behavior_adult
 							;
 							
 		global enviroknow	enviro_know_index

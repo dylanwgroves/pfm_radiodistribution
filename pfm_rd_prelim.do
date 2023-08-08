@@ -112,6 +112,7 @@ ________________________________________________________________________________
 	egen hhdecision_index = rowmean(hhdecision_health_dum hhdecision_school_dum hhdecision_hhfix_dum)
 	
 	/* Crime */
+	gen ptixpref_rank_crime_short = (ptixpref_rank_crime-1)/8
 	gen crime_index = (ptixpref_rank_crime-1)/8
 	
 	
@@ -168,7 +169,7 @@ ________________________________________________________________________________
 	gen b_resp_numhh = b_resp_hh_nbr
 	gen b_resp_lang_swahili =  b_resp_swahili
 	gen b_radio_any = b_radio_ever
-	gen b_asset_cell = b_assets_cell
+	gen b_asset_cell = b_assets_cell	
 	gen b_asset_tv = b_assets_tv
 	gen b_asset_radio_num = b_assets_radios_num
 	
@@ -179,8 +180,7 @@ ________________________________________________________________________________
 	gen crime_femboda_short = gbv_boda_risky_long/3
 
 	egen crime_index = rowmean(crime_natl crime_local_short crime_femtravel_short crime_femboda_short)
-		
-
+	
 /* Save ________________________________________________________________________*/
 
 	merge 1:1 id_resp_uid using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd2_ri.dta", gen(_merge_ri2) force	
@@ -215,10 +215,11 @@ ________________________________________________________________________________
 	cap drop ptixknow_index 
 	egen ptixknow_index = rowmean(ptixknow_natl_vp ptixknow_natl_ports ptixknow_natl_justice ptixknow_natl_pm ptixknow_em_aware ptixknow_fopo_ruto ptixknow_fopo_kenyatta ptixknow_fopo_trump ptixknow_fopo_biden)
 	
+	/* IPV */
+	egen ipv_reject_index = rowmean(ipv_rej_disobey_long ipv_reject_long_gossip)
+	
 	/* Prejudice */
-	bys sample: tab prej_yesnbr_index treat, col
-		
-	bys sample: tab prej_kidmarry_index treat, col
+	
 	
 	
 	
@@ -244,6 +245,7 @@ ________________________________________________________________________________
 
 /* Save ________________________________________________________________________*/
 
+	gen all = "all"
 	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis.dta", replace
 
 

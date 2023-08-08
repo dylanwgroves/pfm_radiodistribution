@@ -39,9 +39,18 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	1
+		global rerandcount	0
 							;
 		
+		
+		/* sample */
+		global sample		all
+							;
+							/* 
+							all
+							as 
+							ne
+							*/
 		/* survey */
 		global survey 		main
 							;
@@ -54,7 +63,7 @@ ________________________________________________________________________________
 					
 		/* Indices */			
 		global index_list	
-							pknow
+							crime 
 							/*
 							takeup
 							stations
@@ -75,6 +84,7 @@ ________________________________________________________________________________
 							enviroknow 
 							trust
 							responsibility
+							crime
 							*/
 							;
 	#d cr
@@ -86,6 +96,10 @@ ________________________________________________________________________________
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_twosided.do"
 
+/* Run Do File ______________________________________________________________*/
+
+	keep if sample == "$sample" | all == "$sample"
+	
 /* Run for Each Index __________________________________________________________*/
 
 foreach index of global index_list {
@@ -109,7 +123,7 @@ foreach index of global index_list {
 				
 		/* Set Put Excel File Name */
 		putexcel clear
-		putexcel set "X:\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_pool_${survey}.xlsx", sheet(`index', replace) modify
+		putexcel set "X:\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}.xlsx", sheet(`index', replace) modify
 		
 		qui putexcel A1 = ("variable")
 		qui putexcel B1 = ("variablelabel")
@@ -215,7 +229,7 @@ foreach index of global index_list {
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri.do"
 			global ripval = ${helper_ripval}
 			*/
-	/* Lasso Regression  _______________________________________________________*/
+	/* Lasso Regression  _______________________________________________________
 
 		qui lasso linear ${dv} ${cov_lasso}										// set this up as a separate do file
 			global lasso_ctls = e(allvars_sel)										
@@ -251,6 +265,7 @@ foreach index of global index_list {
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri_lasso.do"
 			global lasso_ripval = ${helper_lasso_ripval}
 			*/
+		*/
 	/* Export to Excel _________________________________________________________*/ 
 		
 		di "Variable is ${varname}, coefficient is ${coef}, pval is ${pval} / ripval is ${ripval}, N = ${n}"
@@ -262,9 +277,10 @@ foreach index of global index_list {
 		cap qui putexcel C`row' = ("${coef}")
 		cap qui putexcel D`row' = ("${se}")
 		cap qui putexcel E`row' = ("${pval}")
-		cap qui putexcel F`row' = ("${ripval}")
+		*cap qui putexcel F`row' = ("${ripval}")
 		cap qui putexcel G`row' = ("${r2}")
 		cap qui putexcel H`row' = ("${n}")
+/*
 		cap qui putexcel I`row' = ("${lasso_coef}")
 		cap qui putexcel J`row' = ("${lasso_se}")
 		cap qui putexcel K`row' = ("${lasso_pval}")
@@ -273,6 +289,7 @@ foreach index of global index_list {
 		cap qui putexcel N`row' = ("${lasso_n}")
 		cap qui putexcel O`row' = ("${lasso_ctls}")
 		cap qui putexcel P`row' = ("${lasso_ctls_num}")
+*/
 		cap qui putexcel Q`row' = ("${treat_mean}")
 		cap qui putexcel R`row' = ("${treat_sd}")
 		cap qui putexcel S`row' = ("${ctl_mean}")
