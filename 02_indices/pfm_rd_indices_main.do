@@ -49,24 +49,12 @@ ________________________________________________________________________________
 							radio_natleader 
 							;
 							
-		global ppref		/* Political preferences */
+		global responsibility		/* Political preferences */
 							ptixpref_resp_natgov
 							ptixpref_resp_gov
 							ptixpref_resp_locgov
 							ptixpref_resp_vill
 							ptixpref_local_approve	
-							ptixknow_trustloc 
-							ptixknow_trustnat 
-							ptixknow_trustrel
-							ptixpref_rank_crime 
-							ptixpref_rank_efm 
-							ptixpref_rank_justice 
-							ptixpref_rank_ag 
-							ptixpref_rank_edu 
-							ptixpref_rank_electric 
-							ptixpref_rank_sanit 
-							ptixpref_rank_roads 
-							ptixpref_rank_health
 							;
 							
 		global pknow		/* Political preferences */
@@ -76,20 +64,26 @@ ________________________________________________________________________________
 							ptixknow_em_aware 
 							ptixknow_pop_music 
 							ptixknow_pop_sport
+							ptixknow_natl_vp
+							ptixknow_fopo_ruto
+							ptixknow_natl_ports
 							;
 							
 		global ppart 		/* Political Participation */
 							ptixpart_villmeet
 							ptixpart_collact
 							ptixpart_vote
+							ptixpart_raiseissue
 							;
 							
-		global healthknow 	healthknow_index 
-							hivknow_index 
-							healthknow_notradmed 
-							healthknow_nowitchcraft 
-							healthknow_vaccines 
-							healthknow_vaccines_imp 
+		global crime		/* Crime */
+							crime_index 
+							crime_natl
+							crime_local_short
+							crime_femtravel_short 
+							crime_femboda_short
+							ptixpref_rank_crime
+							ptixpart_raiseissue
 							;
 							
 		global gender		/* Gender Equality */
@@ -100,13 +94,13 @@ ________________________________________________________________________________
 							ge_school
 							;
 							
-		global ipv 			ipv_rej_disobey 
-							ipv_rej_hithard 
-							ipv_rej_persists
+		global ipv 			ipv_reject_long_disobey
+							ipv_reject_long_gossip
+							;
+							/* 							
 							ipv_norm_rej 
 							ipv_report
-							;
-							
+							*/
 		global em 			
 							fm_reject
 							fm_reject_long
@@ -158,10 +152,33 @@ ________________________________________________________________________________
 							values_conformity
 							values_urbangood 
 							;
+		
+		global trust		ptixknow_trustloc 
+							ptixknow_trustnat 
+							ptixknow_trustrel 
+							ptixknow_trustradio
+							;
 							
-		global wpp 			wpp_attitude_dum 
+		global wpp 			wpp_attitude2_dum
+							wpp_attitude_dum 
 							wpp_norm_dum 
 							wpp_behavior 
+							wpp_behavior_self
+							wpp_behavior_wife
+							;
+							
+		global enviroknow	enviro_know_index
+							enviro_ccknow_mean_dum
+							enviro_cause_human
+							enviro_cause_intl
+							;
+							
+		global healthknow 	healthknow_index 
+							hivknow_index 
+							healthknow_notradmed 
+							healthknow_nowitchcraft 
+							healthknow_vaccines 
+							healthknow_vaccines_imp 
 							;
 							
 		global hivknow		hivknow_index 
@@ -182,30 +199,19 @@ ________________________________________________________________________________
 							hivstigma_yesbus 
 							hivstigma_notfired_norm 
 							;
+							
+
 		/* Covariates */	
 		global cov_always	i.block_rd
 							;					
 
 		
 		/* Lasso Covariates */
-		global cov_lasso	resp_female 
-							resp_muslim 
-							b_resp_religiosity
-							b_values_likechange 
-							b_values_techgood 
-							b_values_respectauthority 
-							b_fm_reject
-							b_ge_raisekids 
-							b_ge_earning 
-							b_ge_leadership 
-							b_ge_noprefboy 
-							b_radio_any 
-							b_resp_lang_swahili 
-							b_resp_literate 
-							b_resp_standard7 
-							b_resp_married 
-							b_resp_hhh 
-							b_resp_numkid
+		global cov_lasso	resp_female resp_muslim b_resp_standard7 	 
+							b_resp_religiosity b_resp_lang_swahili 
+							b_resp_numhh 
+							b_radio_any
+							b_asset_cell b_asset_tv
 							;
 
 		#d cr

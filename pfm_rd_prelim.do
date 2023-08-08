@@ -21,10 +21,25 @@ ________________________________________________________________________________
 	global c_date = c(current_date)
 	set seed 1956
 	
+	
+/* Save RI treatments elsewhere ________________________________________________*/
 
-/* Load Data ___________________________________________________________________*/	
+	use "X:/Dropbox/Wellspring Tanzania Papers/wellspring_01_master/01_data/03_final_data/pfm_appended_noprefix.dta", clear
 
-	use "${data}/03_final_data/pfm_appended_noprefix.dta", clear
+	/* RI Treatment Variables 
+	drop treat_*
+	rename rd_treat_* treat_*
+	keep id_resp_uid treat_* 
+	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_ri.dta", replace
+	*/
+	
+/* Load Data ___________________________________________________________________*/		
+
+	use "X:/Dropbox/Wellspring Tanzania Papers/wellspring_01_master/01_data/03_final_data/pfm_appended_noprefix.dta", clear
+	drop treat_*
+	lab def treat 0 "control" 1 "treat", replace
+	drop rd_treat_*
+	drop resp_id
 
 
 /* Subset Data _________________________________________________________________*/	
@@ -37,7 +52,7 @@ ________________________________________________________________________________
 	foreach var of varlist radio_stations_* {
 		tab `var' if treat == 1
 	}
-	
+
 
 /* Generate any necessary variables ____________________________________________*/
 
@@ -46,20 +61,11 @@ ________________________________________________________________________________
 		replace endline = endline_ne if sample == "ne"
 		replace endline = 0 if endline == .
 		keep if endline == 1													// Assuming we only want folks we found at endline?
-
-	/* Encode Sample */
-	encode sample, gen(sample_num)
 	
-	/* Encode Block */
-	encode rd_block, gen(block_rd)
-	
-		/* Set as treatment to missing */
+	/* Set NE treatment to missing
 	gen treatment_group = treat_as
 		replace treatment_group = 2 if treatment_group == .
-			
-	/* RI Treatment Variables */
-	drop treat_*
-	rename rd_treat_* treat_*
+	 */
 	
 	/* Uptake */
 	replace rd_receive = 0 if rd_receive == . & (endline_ne == 1 | endline_as == 1)
@@ -105,46 +111,139 @@ ________________________________________________________________________________
 	drop hhdecision_index 
 	egen hhdecision_index = rowmean(hhdecision_health_dum hhdecision_school_dum hhdecision_hhfix_dum)
 	
+	/* Crime */
+	gen crime_index = (ptixpref_rank_crime-1)/8
+	
+	
 /* Create baseline variables  __________________________________________________
 
 	radios were distributed after midline of the AS survey, so can use that as
 	the baseline
-*/
+
 
 	replace b_ge_school = m_s5q4_gh_school if sample == "as"
 	replace b_em_reject_story = (1 - m_s4q1_fm_yesself) if sample == "as"
 	replace b_ipv_rej_disobey = m_s8q3a_ipv_disobey  if sample == "as"
 	replace b_ipv_norm_rej = (1-m_s11q1_ipv_hitnorm)  if sample == "as"
 	replace b_values_elders = b_values_trustelders  if sample == "as"
+*/
+	
+/* Save ________________________________________________________________________*/
 
+	merge 1:1 id_resp_uid using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_ri.dta", gen(_merge_ri1)
+	keep if _merge_ri1==1 | _merge_ri1==3
+	
+	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_analysis.dta", replace
+
+/*______________________________________________________________________________
+
+								AUDIO SCREENING 2
+________________________________________________________________________________*/
+
+/* Load Data ___________________________________________________________________*/	
+
+	use "${data_endline}/pfm5_endline_basemid.dta", clear
+	drop treat
+	rename treat_rd treat
+	drop treat_* 
+	lab def treat 0 "control" 1 "treat", replace 
+	
+/* Subset Data _________________________________________________________________*/	
+	
+	/* resp uid */
+	rename resp_id id_resp_uid 
+	
+	/* Get correct sample */
+	keep if treat != .
+	
+	
+/* Generate variables __________________________________________________________*/
+
+	gen sample = "as2"
+	
+	gen rd_block = id_village_uid
+	
+	gen resp_muslim = b_resp_muslim 
+	*gen resp_age = b_resp_age 
+	gen b_resp_numhh = b_resp_hh_nbr
+	gen b_resp_lang_swahili =  b_resp_swahili
+	gen b_radio_any = b_radio_ever
+	gen b_asset_cell = b_assets_cell
+	gen b_asset_tv = b_assets_tv
+	gen b_asset_radio_num = b_assets_radios_num
+	
+/* Create indices ______________________________________________________________*/
+
+	gen crime_local_short = crime_local/3 
+	gen crime_femtravel_short = gbv_travel_risky_long/3
+	gen crime_femboda_short = gbv_boda_risky_long/3
+
+	egen crime_index = rowmean(crime_natl crime_local_short crime_femtravel_short crime_femboda_short)
+		
+
+/* Save ________________________________________________________________________*/
+
+	merge 1:1 id_resp_uid using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd2_ri.dta", gen(_merge_ri2) force	
+	keep if _merge_ri2==1 | _merge_ri2==3
+	
+	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd2_analysis.dta", replace
+	
+	
+	
+	
+/*______________________________________________________________________________
+
+								COMBINE
+________________________________________________________________________________*/
+
+	
+/* Append ______________________________________________________________________*/
+
+	use "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_analysis.dta", clear
+	
+	append using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd2_analysis.dta", force
+	
+/* Create key variables ________________________________________________________*/
+
+	/* Encode Sample */
+	encode sample, gen(sample_num)
+
+	/* Encode Block */
+	encode rd_block, gen(block_rd)
+	
+	/* Ptix Know */
+	cap drop ptixknow_index 
+	egen ptixknow_index = rowmean(ptixknow_natl_vp ptixknow_natl_ports ptixknow_natl_justice ptixknow_natl_pm ptixknow_em_aware ptixknow_fopo_ruto ptixknow_fopo_kenyatta ptixknow_fopo_trump ptixknow_fopo_biden)
+	
+	/* Prejudice */
+	bys sample: tab prej_yesnbr_index treat, col
+		
+	bys sample: tab prej_kidmarry_index treat, col
+	
+	
 	
 /* Filling Missing Baseline Values _____________________________________________*/
 
-		#d ;
-		/* Lasso Covariates */
-		global cov_lasso	resp_age resp_female resp_muslim b_resp_standard7 b_resp_married 
-							b_resp_religiosity b_resp_literate b_resp_lang_swahili 
-							b_resp_yrsvill 
-							b_resp_numhh b_resp_numkid b_resp_numolder b_resp_numyounger b_resp_numadult 
-							b_ge_index b_ge_raisekids b_ge_earning b_ge_leadership b_ge_noprefboy 
-							b_fm_reject 
-							b_ipv_rej_disobey b_ipv_norm_rej
-							b_radio_any
-							b_values_likechange b_values_techgood 
-							b_values_elders b_values_respectauthority
-							b_asset_cell b_asset_tv b_asset_radio_num
-							
-							;
-							
-			#d cr
-			
-			foreach var of global cov_lasso {
-				bys id_village_uid : egen vill_`var' = mean(`var')
-				replace `var' = vill_`var' if `var' == . | `var' == .d | `var' == .r
-			}
-			
+	#d ;
+	/* Lasso Covariates 
+	resp_age 
+	*/
+	global cov_lasso	resp_female resp_muslim b_resp_standard7 	 
+						b_resp_religiosity b_resp_lang_swahili 
+						b_resp_numhh 
+						b_radio_any
+						b_asset_cell b_asset_tv b_asset_radio_num				
+						;
+						
+		#d cr
 		
+		foreach var of global cov_lasso {
+			bys id_village_uid : egen vill_`var' = mean(`var')
+			replace `var' = vill_`var' if `var' == . | `var' == .d | `var' == .r
+		}
+
 /* Save ________________________________________________________________________*/
 
-	save "${data_rd}/pfm_rd_analysis.dta", replace
-	
+	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis.dta", replace
+
+

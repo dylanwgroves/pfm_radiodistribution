@@ -25,7 +25,8 @@ ________________________________________________________________________________
 
 /* Load Data ___________________________________________________________________*/	
 
-	use "${data_rd}/pfm_rd_analysis.dta", clear
+	use "X:\Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis.dta", clear
+	
 	encode id_village_uid, gen(id_village_uid_c)
 	
 
@@ -38,7 +39,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	100
+		global rerandcount	1
 							;
 		
 		/* survey */
@@ -52,8 +53,8 @@ ________________________________________________________________________________
 							*/
 					
 		/* Indices */			
-		local index_list	
-							uptake
+		global index_list	
+							pknow
 							/*
 							takeup
 							stations
@@ -71,6 +72,9 @@ ________________________________________________________________________________
 							ppref
 							pknow
 							healthknow
+							enviroknow 
+							trust
+							responsibility
 							*/
 							;
 	#d cr
@@ -78,13 +82,13 @@ ________________________________________________________________________________
 	
 /* Run Do File ______________________________________________________________*/
 
-	do "${code}/pfm_radiodistribution/02_indices/pfm_rd_indices_${survey}.do"
-	do "${code}/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
-	do "${code}/pfm_radiodistribution/02_indices/pfm_rd_twosided.do"
+	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_indices_${survey}.do"
+	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
+	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_twosided.do"
 
 /* Run for Each Index __________________________________________________________*/
 
-foreach index of local index_list {
+foreach index of global index_list {
 
 	/* Drop Macros */
 	macro drop lasso_ctls 
@@ -105,7 +109,7 @@ foreach index of local index_list {
 				
 		/* Set Put Excel File Name */
 		putexcel clear
-		putexcel set "${rd_tables}/pfm_rd_analysis_${survey}.xlsx", sheet(`index', replace) modify
+		putexcel set "X:\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_pool_${survey}.xlsx", sheet(`index', replace) modify
 		
 		qui putexcel A1 = ("variable")
 		qui putexcel B1 = ("variablelabel")
@@ -138,12 +142,19 @@ foreach index of local index_list {
 	/* Summary Stats ___________________________________________________________*/
 
 		/* Set locals */
-		local var_list ${`index'}												// Variables
+		global var_list ${`index'}												// Variables
 		local row = 2															// Row for exporting to matrix
-		foreach dv of local var_list  {
+		
+		
+		/* Run through locals */
+		foreach dv of global var_list  {
 		
 		/* variable */
 		global dv `dv'
+		
+		di "********************************************************************"
+		di "THE VARIABLE IS `dv'"
+		di "********************************************************************"
 		
 		/* set test */
 		if strpos("$twosided", "`dv'") { 
@@ -161,31 +172,31 @@ foreach index of local index_list {
 		global varlabel : var label `dv'
 		
 		/* Treatment mean */
-		qui sum `dv' if treat == 0 
+		qui sum ${dv} if treat == 0 
 			global ctl_mean `r(mean)'
 			global ctl_sd `r(sd)'
 
 		/* Control mean */
-		qui sum `dv' if treat == 1 
+		qui sum ${dv} if treat == 1 
 			global treat_mean `r(mean)'
 			global treat_sd `r(sd)'
 			
 		/* Control village sd */
 		preserve
-		qui collapse (mean) `dv' treat, by(id_village_uid)
-		qui sum `dv' if treat == 0
+		qui collapse (mean) ${dv} treat, by(id_village_uid)
+		qui sum ${dv} if treat == 0
 			global vill_sd : di %6.3f r(sd)
 		restore
 
 		/* Variable range */	
-		qui sum `dv' 
+		qui sum ${dv} 
 			global min = r(min)
 			global max = r(max)
 			
 			
 	/* Basic Regression ________________________________________________________*/
 
-		qui xi: reg `dv' treat ${cov_always}									// This is the core regression
+		reg ${dv} treat 												// This is the core regression ${cov_always}
 			matrix table = r(table)
 			
 			/* Save values from regression */
@@ -197,27 +208,27 @@ foreach index of local index_list {
 			global df 	= e(df_r)
 			
 			/* Calculate pvalue */
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval.do"
+			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval.do"
 			global pval = ${helper_pval}
 			
-			/* Calculate RI-pvalue */
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri.do"
+			/* Calculate RI-pvalue 
+			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri.do"
 			global ripval = ${helper_ripval}
+			*/
+	/* Lasso Regression  _______________________________________________________*/
 
-	/* Lasso Regression  ___________________________________________________________*/
-
-		qui lasso linear `dv' ${cov_lasso}										// set this up as a separate do file
+		qui lasso linear ${dv} ${cov_lasso}										// set this up as a separate do file
 			global lasso_ctls = e(allvars_sel)										
 			global lasso_ctls_num = e(k_nonzero_sel)
 
 	
 		if ${lasso_ctls_num} != 0 {												// If lassovars selected	
-			qui regress `dv' treat ${cov_always} ${lasso_ctls}
+			qui regress ${dv} treat ${cov_always} ${lasso_ctls}
 				matrix table = r(table)
 			}
 			
 			else if ${lasso_ctls_num} == 0 {									// If no lassovars selected
-				qui regress `dv' treat ${cov_always}
+				qui regress ${dv} treat ${cov_always}
 					matrix table = r(table)
 			}	
 		
@@ -233,56 +244,51 @@ foreach index of local index_list {
 			global lasso_df 	= e(df_r)
 
 			/* Calculate one-sided pvalue */				
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_lasso.do"
+			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_lasso.do"
 			global lasso_pval = ${helper_lasso_pval}
 			
-			/* Calculate Lasso RI-pvalue */
-			do "${code}/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri_lasso.do"
+			/* Calculate Lasso RI-pvalue 
+			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri_lasso.do"
 			global lasso_ripval = ${helper_lasso_ripval}
-		
+			*/
 	/* Export to Excel _________________________________________________________*/ 
 		
 		di "Variable is ${varname}, coefficient is ${coef}, pval is ${pval} / ripval is ${ripval}, N = ${n}"
-		di "LASSO: Variable is ${varname}, coefficient is ${lasso_coef}, lasso pval is ${lasso_pval} / lasso ripval is ${lasso_ripval}, N = ${lasso_n}"
-		di "LASSO vars were ${lasso_ctls}"
+		*di "LASSO: Variable is ${varname}, coefficient is ${lasso_coef}, lasso pval is ${lasso_pval} / lasso ripval is ${lasso_ripval}, N = ${lasso_n}"
+		*di "LASSO vars were ${lasso_ctls}"
 
-		qui putexcel A`row' = ("${varname}")
-		qui putexcel B`row' = ("${varlabel}")
-		qui putexcel C`row' = ("${coef}")
-		qui putexcel D`row' = ("${se}")
-		qui putexcel E`row' = ("${pval}")
-		qui putexcel F`row' = ("${ripval}")
-		qui putexcel G`row' = ("${r2}")
-		qui putexcel H`row' = ("${n}")
-		qui putexcel I`row' = ("${lasso_coef}")
-		qui putexcel J`row' = ("${lasso_se}")
-		qui putexcel K`row' = ("${lasso_pval}")
-		qui putexcel L`row' = ("${lasso_ripval}")
-		qui putexcel M`row' = ("${lasso_r2}")
-		qui putexcel N`row' = ("${lasso_n}")
-		qui putexcel O`row' = ("${lasso_ctls}")
-		qui putexcel P`row' = ("${lasso_ctls_num}")
-		qui putexcel Q`row' = ("${treat_mean}")
-		qui putexcel R`row' = ("${treat_sd}")
-		qui putexcel S`row' = ("${ctl_mean}")
-		qui putexcel T`row' = ("${ctl_sd}")
-		qui putexcel U`row' = ("${vill_sd}")
-		qui putexcel V`row' = ("${min}")
-		qui putexcel W`row' = ("${max}")
-		qui putexcel X`row' = ("${lasso_ctls_replacement}")
-		qui putexcel Y`row' = ("${lasso_ctls_num_replacement}")
-		qui putexcel Z`row' = ("${test}")
+		cap qui putexcel A`row' = ("${varname}")
+		cap qui putexcel B`row' = ("${varlabel}")
+		cap qui putexcel C`row' = ("${coef}")
+		cap qui putexcel D`row' = ("${se}")
+		cap qui putexcel E`row' = ("${pval}")
+		cap qui putexcel F`row' = ("${ripval}")
+		cap qui putexcel G`row' = ("${r2}")
+		cap qui putexcel H`row' = ("${n}")
+		cap qui putexcel I`row' = ("${lasso_coef}")
+		cap qui putexcel J`row' = ("${lasso_se}")
+		cap qui putexcel K`row' = ("${lasso_pval}")
+		cap qui putexcel L`row' = ("${lasso_ripval}")
+		cap qui putexcel M`row' = ("${lasso_r2}")
+		cap qui putexcel N`row' = ("${lasso_n}")
+		cap qui putexcel O`row' = ("${lasso_ctls}")
+		cap qui putexcel P`row' = ("${lasso_ctls_num}")
+		cap qui putexcel Q`row' = ("${treat_mean}")
+		cap qui putexcel R`row' = ("${treat_sd}")
+		cap qui putexcel S`row' = ("${ctl_mean}")
+		cap qui putexcel T`row' = ("${ctl_sd}")
+		cap qui putexcel U`row' = ("${vill_sd}")
+		cap qui putexcel V`row' = ("${min}")
+		cap qui putexcel W`row' = ("${max}")
+		cap qui putexcel X`row' = ("${lasso_ctls_replacement}")
+		cap qui putexcel Y`row' = ("${lasso_ctls_num_replacement}")
+		cap qui putexcel Z`row' = ("${test}")
 		
 		/* Update locals ___________________________________________________________*/
 		
 		local row = `row' + 1
 		}
 }
-
-
-
-
-
 
 
 
