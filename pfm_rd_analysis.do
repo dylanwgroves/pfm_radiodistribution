@@ -63,28 +63,27 @@ ________________________________________________________________________________
 					
 		/* Indices */			
 		global index_list	
-							crime 
-							/*
 							takeup
 							stations
 							topics
 							gender
 							wpp
 							ipv
-							em
 							prej_nbr
 							prej_marry
-							prej_thermo
 							values
 							pint
 							ppart
 							ppref
 							pknow
-							healthknow
-							enviroknow 
 							trust
 							responsibility
 							crime
+							/*
+							prej_thermo
+							healthknow
+							enviroknow 
+							em
 							*/
 							;
 	#d cr

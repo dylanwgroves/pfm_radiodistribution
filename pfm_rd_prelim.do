@@ -40,7 +40,7 @@ ________________________________________________________________________________
 	lab def treat 0 "control" 1 "treat", replace
 	drop rd_treat_*
 	drop resp_id
-
+no
 
 /* Subset Data _________________________________________________________________*/	
 	
@@ -136,14 +136,15 @@ ________________________________________________________________________________
 	
 	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_analysis.dta", replace
 
+	
 /*______________________________________________________________________________
 
-								AUDIO SCREENING 2
+							AUDIO SCREENING 2
 ________________________________________________________________________________*/
 
 /* Load Data ___________________________________________________________________*/	
 
-	use "${data_endline}/pfm5_endline_basemid.dta", clear
+	use "X:/Box Sync/07_Questionnaires & Data/04 Endline/03 Data Flow/4_data/2_survey/pfm5_endline_basemid.dta", clear
 	drop treat
 	rename treat_rd treat
 	drop treat_* 
@@ -219,8 +220,6 @@ ________________________________________________________________________________
 	egen ipv_reject_index = rowmean(ipv_rej_disobey_long ipv_reject_long_gossip)
 	
 	/* Prejudice */
-	
-	
 	
 	
 /* Filling Missing Baseline Values _____________________________________________*/

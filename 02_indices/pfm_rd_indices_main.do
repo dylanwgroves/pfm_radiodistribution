@@ -207,7 +207,7 @@ ________________________________________________________________________________
 							
 
 		/* Covariates */	
-		global cov_always	i.block_rd
+		global cov_always	i.id_village_uid_c
 							;					
 
 		
