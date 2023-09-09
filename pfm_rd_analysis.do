@@ -27,8 +27,6 @@ ________________________________________________________________________________
 
 	use "X:\Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis.dta", clear
 	
-	encode id_village_uid, gen(id_village_uid_c)
-	
 
 /* Define Parameters ___________________________________________________*/
 
@@ -39,7 +37,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	0
+		global rerandcount	10
 							;
 		
 		
@@ -62,24 +60,26 @@ ________________________________________________________________________________
 							*/
 					
 		/* Indices */			
-		global index_list	
+		global index_list	ccm
+							prej_nbr
+							prej_marry
+							values
+							pint
+							ppart
+							pknow
+							crime
+							
+							/*
 							takeup
 							stations
 							topics
 							gender
 							wpp
 							ipv
-							prej_nbr
-							prej_marry
-							values
-							pint
-							ppart
 							ppref
 							pknow
 							trust
 							responsibility
-							crime
-							/*
 							prej_thermo
 							healthknow
 							enviroknow 
@@ -94,6 +94,8 @@ ________________________________________________________________________________
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_indices_${survey}.do"
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_twosided.do"
+
+
 
 /* Run Do File ______________________________________________________________*/
 
@@ -150,6 +152,7 @@ foreach index of global index_list {
 		qui putexcel X1 = ("lasso_ctls_replacement")
 		qui putexcel Y1 = ("lasso_ctls_num_replacement")
 		qui putexcel Z1 = ("test")
+		qui putexcel AA1 = ("date")
 
 	
 	/* Summary Stats ___________________________________________________________*/
@@ -209,7 +212,7 @@ foreach index of global index_list {
 			
 	/* Basic Regression ________________________________________________________*/
 
-		reg ${dv} treat 												// This is the core regression ${cov_always}
+		reg ${dv} treat ${cov_always} 												// This is the core regression ${cov_always}
 			matrix table = r(table)
 			
 			/* Save values from regression */
@@ -224,11 +227,12 @@ foreach index of global index_list {
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval.do"
 			global pval = ${helper_pval}
 			
-			/* Calculate RI-pvalue 
+			/* Calculate RI-pvalue */
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri.do"
 			global ripval = ${helper_ripval}
-			*/
-	/* Lasso Regression  _______________________________________________________
+			
+			
+	/* Lasso Regression  _______________________________________________________*/
 
 		qui lasso linear ${dv} ${cov_lasso}										// set this up as a separate do file
 			global lasso_ctls = e(allvars_sel)										
@@ -260,11 +264,13 @@ foreach index of global index_list {
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_lasso.do"
 			global lasso_pval = ${helper_lasso_pval}
 			
-			/* Calculate Lasso RI-pvalue 
+			/* Calculate Lasso RI-pvalue */
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri_lasso.do"
 			global lasso_ripval = ${helper_lasso_ripval}
-			*/
-		*/
+			
+		** Capture time
+		global date = c(current_date)
+		
 	/* Export to Excel _________________________________________________________*/ 
 		
 		di "Variable is ${varname}, coefficient is ${coef}, pval is ${pval} / ripval is ${ripval}, N = ${n}"
@@ -276,10 +282,10 @@ foreach index of global index_list {
 		cap qui putexcel C`row' = ("${coef}")
 		cap qui putexcel D`row' = ("${se}")
 		cap qui putexcel E`row' = ("${pval}")
-		*cap qui putexcel F`row' = ("${ripval}")
+		cap qui putexcel F`row' = ("${ripval}")
 		cap qui putexcel G`row' = ("${r2}")
 		cap qui putexcel H`row' = ("${n}")
-/*
+		
 		cap qui putexcel I`row' = ("${lasso_coef}")
 		cap qui putexcel J`row' = ("${lasso_se}")
 		cap qui putexcel K`row' = ("${lasso_pval}")
@@ -288,7 +294,8 @@ foreach index of global index_list {
 		cap qui putexcel N`row' = ("${lasso_n}")
 		cap qui putexcel O`row' = ("${lasso_ctls}")
 		cap qui putexcel P`row' = ("${lasso_ctls_num}")
-*/
+
+
 		cap qui putexcel Q`row' = ("${treat_mean}")
 		cap qui putexcel R`row' = ("${treat_sd}")
 		cap qui putexcel S`row' = ("${ctl_mean}")
@@ -299,6 +306,7 @@ foreach index of global index_list {
 		cap qui putexcel X`row' = ("${lasso_ctls_replacement}")
 		cap qui putexcel Y`row' = ("${lasso_ctls_num_replacement}")
 		cap qui putexcel Z`row' = ("${test}")
+		cap qui putexcel AA`row' = ("${date}")
 		
 		/* Update locals ___________________________________________________________*/
 		

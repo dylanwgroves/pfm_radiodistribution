@@ -210,8 +210,6 @@ ________________________________________________________________________________
 		global ccm			ppart_corruption 
 							ppart_ccm_perform 
 							thermo_ccm_num
-							thermo_samia_num
-							;
 							
 
 		/* Covariates */	

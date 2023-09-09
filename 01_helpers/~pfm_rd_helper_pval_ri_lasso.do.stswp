@@ -37,7 +37,7 @@ if "$test" == "twosided" {
 	forval k = 1/$rerandcount {
 		
 		if ${lasso_ctls_num} != 0 {											// If lassovars selected						
-			qui regress $dv treat_`k' ${cov_always} ${lasso_ctls}
+			qui regress $dv treat_`k' ${cov_always} ${lasso_ctls}, cluster(id_village_n)
 				matrix LASSO_RIP = r(table)
 			}
 			
