@@ -25,14 +25,31 @@ ________________________________________________________________________________
 							;
 							
 		global stations		/* Stations */
-							radio_stations_uhurudar
-							radio_stations_tk
-							radio_stations_uhuru
-							radio_stations_huruma
-							radio_stations_rone 
-							radio_stations_pfm 
-							radio_stations_tbc 
 							radio_stations_voa 
+							radio_stations_tbc 
+							radio_stations_efm 
+							radio_stations_breeze 
+							radio_stations_pfm 
+							radio_stations_clouds 
+							radio_stations_rmaria 
+							radio_stations_rone 
+							radio_stations_huruma 
+							radio_stations_mwambao 
+							radio_stations_wasafi 
+							radio_stations_nuru 
+							radio_stations_uhuru 
+							radio_stations_bbc 
+							radio_stations_sya 
+							radio_stations_tk 
+							radio_stations_kenya 
+							radio_stations_imani 
+							radio_stations_freeafrica 
+							radio_stations_abood 
+							radio_stations_uhurudar 
+							radio_stations_upendo 
+							radio_stations_kiss 
+							radio_stations_times 
+							radio_uhuru
 							;
 							
 		global topics		/* Topics */
@@ -210,8 +227,6 @@ ________________________________________________________________________________
 		global ccm			ppart_corruption 
 							ppart_ccm_perform 
 							thermo_ccm_num
-							thermo_samia_num
-							;
 							
 
 		/* Covariates */	
