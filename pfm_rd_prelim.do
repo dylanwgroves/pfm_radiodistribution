@@ -150,7 +150,7 @@ ________________________________________________________________________________
 
 /* Load Data ___________________________________________________________________*/	
 
-	use "X:/Box/07_Questionnaires & Data/04 Endline/03 Data Flow/4_data/2_survey/pfm5_endline_basemid.dta", clear
+	use "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\wellspring_01_master\01_data\02_mid_data\pfm5_endline_basemid.dta", clear
 
 	drop treat
 	rename treat_rd treat
@@ -197,8 +197,40 @@ ________________________________________________________________________________
 	
 	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd2_analysis.dta", replace
 	
+
+/*______________________________________________________________________________
+
+							COMMUNITY SCREENING
+________________________________________________________________________________*/
 	
 	
+/* Load Data ___________________________________________________________________*/	
+
+	use "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\wellspring_01_master\01_data\01_raw_data/pfm5_pangani_clean.dta", clear
+
+	*drop treat
+	rename radio_treat treat
+	drop treat_* 
+	lab def treat 0 "control" 1 "treat", replace 
+	
+	gen resp_muslim = b_resp_muslim
+	gen b_resp_numhh = b_resp_hh_nbr
+	gen b_resp_lang_swahili =  b_resp_swahili
+	gen b_radio_any = b_radio_ever
+	gen b_asset_cell = b_assets_cell	
+	gen b_asset_tv = b_assets_tv
+	gen b_asset_radio_num = b_assets_radios_num
+	
+/* Create indices ______________________________________________________________*/
+
+	gen crime_local_short = crime_local/3 
+	gen crime_femtravel_short = gbv_travel_risky_long/3
+	gen crime_femboda_short = gbv_boda_risky_long/3
+
+	egen crime_index = rowmean(crime_natl crime_local_short crime_femtravel_short crime_femboda_short)
+	
+	
+stop	
 	
 /*______________________________________________________________________________
 
