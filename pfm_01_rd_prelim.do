@@ -24,6 +24,7 @@ ________________________________________________________________________________
 	set maxvar 30000
 	
 	
+	
 /* Save RI treatments elsewhere ________________________________________________*/
 
 	use "X:/Dropbox/Wellspring Tanzania Papers/wellspring_01_master/01_data/03_final_data/pfm_appended_noprefix.dta", clear
@@ -35,6 +36,13 @@ ________________________________________________________________________________
 	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_ri.dta", replace
 	*/
 	
+	
+/*______________________________________________________________________________
+
+							AUDIO SCREENING 1
+________________________________________________________________________________*/
+
+
 /* Load Data ___________________________________________________________________*/		
 
 	use "X:/Dropbox/Wellspring Tanzania Papers/wellspring_01_master/01_data/03_final_data/pfm_appended_noprefix.dta", clear
@@ -205,33 +213,49 @@ ________________________________________________________________________________
 	
 	
 /* Load Data ___________________________________________________________________*/	
+	
+	use "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Uzikwasa\01_data\pfm_communitysurvey_20202021_cleaned.dta", clear
 
-	use "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\wellspring_01_master\01_data\01_raw_data/pfm5_pangani_clean.dta", clear
+	merge 1:1 resp_id using "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\wellspring_01_master\01_data\01_raw_data/pfm5_pangani_clean.dta", gen(_merge_communitysurvey2) force
+	
+	tab radio_treat _merge_communitysurvey2, m
+
+	*keep if radio_treat != "" & _merge_communitysurvey == 3
+
+	merge 1:1 resp_id using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rduzikwasa_ri.dta", gen(_merge_communitysurvey_ri) force
+	keep if _merge_communitysurvey_ri==3
 
 	*drop treat
 	rename radio_treat treat
 	drop treat_* 
 	lab def treat 0 "control" 1 "treat", replace 
 	
-	gen resp_muslim = b_resp_muslim
-	gen b_resp_numhh = b_resp_hh_nbr
-	gen b_resp_lang_swahili =  b_resp_swahili
-	gen b_radio_any = b_radio_ever
-	gen b_asset_cell = b_assets_cell	
-	gen b_asset_tv = b_assets_tv
-	gen b_asset_radio_num = b_assets_radios_num
-	
+	gen b_resp_muslim = (resp_religion == 3)
+	replace resp_muslim = b_resp_muslim
+	gen b_resp_numhh = resp_hh_nbr
+		replace b_resp_numhh = resp_hh_size if b_resp_numhh == .
+	gen b_resp_lang_swahili =  resp_swahili
+		replace b_resp_lang_swahili = (resp_language_main == 1) if b_resp_lang_swahili == .
+	gen b_radio_any = media_radio_ever 
+		replace b_radio_any = radio_ever if b_radio_any == .
+	gen b_asset_cell = assets_cell	
+		replace b_asset_cell = s16q5 if b_asset_cell == .
+	gen b_asset_tv = assets_tv
+		replace b_asset_tv =  s16q3 if b_asset_tv == .
+	gen b_asset_radio_num = assets_radio_num
+		
 /* Create indices ______________________________________________________________*/
 
 	gen crime_local_short = crime_local/3 
-	gen crime_femtravel_short = gbv_travel_risky_long/3
-	gen crime_femboda_short = gbv_boda_risky_long/3
+	*gen crime_femtravel_short = gbv_travel_risky_long/3
+	*gen crime_femboda_short = gbv_boda_risky_long/3
 
-	egen crime_index = rowmean(crime_natl crime_local_short crime_femtravel_short crime_femboda_short)
+	egen crime_index = rowmean(crime_natl crime_local_short)
 	
-	
-stop	
-	
+/* Save ________________________________________________________________________*/
+
+	save "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\01 Data/pfm_rd3_analysis.dta", replace
+
 /*______________________________________________________________________________
 
 								COMBINE
@@ -244,6 +268,9 @@ ________________________________________________________________________________
 	use "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_analysis.dta", clear
 	
 	append using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd2_analysis.dta", force
+	
+	append using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd3_analysis.dta", force
+
 	
 /* Create key variables ________________________________________________________*/
 

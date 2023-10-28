@@ -227,7 +227,7 @@ ________________________________________________________________________________
 		global ccm			ppart_corruption 
 							ppart_ccm_perform 
 							thermo_ccm_num
-							
+							;
 
 		/* Covariates */	
 		global cov_always	i.block_rd
