@@ -29,13 +29,13 @@ ________________________________________________________________________________
 
 	use "X:/Dropbox/Wellspring Tanzania Papers/wellspring_01_master/01_data/03_final_data/pfm_appended_noprefix.dta", clear
 
-	/* RI Treatment Variables 
+	/* RI Treatment Variables 	*/
 	drop treat_*
 	rename rd_treat_* treat_*
 	keep id_resp_uid treat_* 
 	save "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd1_ri.dta", replace
-	*/
-	
+
+
 	
 /*______________________________________________________________________________
 
@@ -158,8 +158,10 @@ ________________________________________________________________________________
 
 /* Load Data ___________________________________________________________________*/	
 
-	use "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\wellspring_01_master\01_data\02_mid_data\pfm5_endline_basemid.dta", clear
-
+	use "${data}/03_final_data/pfm_as2_merged.dta", clear
+	rename as2_* *
+	drop e_id_village_uid
+	rename e_* *
 	drop treat
 	rename treat_rd treat
 	drop treat_* 
@@ -168,16 +170,11 @@ ________________________________________________________________________________
 	
 /* Subset Data _________________________________________________________________*/	
 	
-	/* resp uid */
-	rename resp_id id_resp_uid 
-	
 	/* Get correct sample */
 	keep if treat != .
 	
 	
 /* Generate variables __________________________________________________________*/
-
-	gen sample = "as2"
 	
 	gen rd_block = id_village_uid
 	
@@ -214,35 +211,36 @@ ________________________________________________________________________________
 	
 /* Load Data ___________________________________________________________________*/	
 	
-	use "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Uzikwasa\01_data\pfm_communitysurvey_20202021_cleaned.dta", clear
-
-	merge 1:1 resp_id using "C:\Users\grovesd\Dropbox\Wellspring Tanzania Papers\wellspring_01_master\01_data\01_raw_data/pfm5_pangani_clean.dta", gen(_merge_communitysurvey2) force
+	use "${data}/03_final_data/pfm_cm_merged.dta", clear
+	rename cm3_* *
+	rename cm2_* b_*
 	
-	tab radio_treat _merge_communitysurvey2, m
-
-	*keep if radio_treat != "" & _merge_communitysurvey == 3
-
-	merge 1:1 resp_id using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rduzikwasa_ri.dta", gen(_merge_communitysurvey_ri) force
-	keep if _merge_communitysurvey_ri==3
+	gen treat = 1 if treat_rd_pull == "Radio"
+		replace treat = 0 if treat_rd_pull == "Flashlight"
+	keep if treat != .
+	
+	gen rd_block = id_village_uid
 
 	*drop treat
-	rename radio_treat treat
-	drop treat_* 
 	lab def treat 0 "control" 1 "treat", replace 
 	
+	rename rd_treat_* treat_*
+	
 	gen b_resp_muslim = (resp_religion == 3)
-	replace resp_muslim = b_resp_muslim
-	gen b_resp_numhh = resp_hh_nbr
-		replace b_resp_numhh = resp_hh_size if b_resp_numhh == .
-	gen b_resp_lang_swahili =  resp_swahili
-		replace b_resp_lang_swahili = (resp_language_main == 1) if b_resp_lang_swahili == .
-	gen b_radio_any = media_radio_ever 
-		replace b_radio_any = radio_ever if b_radio_any == .
-	gen b_asset_cell = assets_cell	
-		replace b_asset_cell = s16q5 if b_asset_cell == .
-	gen b_asset_tv = assets_tv
-		replace b_asset_tv =  s16q3 if b_asset_tv == .
-	gen b_asset_radio_num = assets_radio_num
+
+	gen b_resp_numhh = b_resp_hh_nbr
+		replace b_resp_numhh = cm1_resp_hh_size if b_resp_numhh == .
+	gen b_resp_lang_swahili =  cm1_resp_swahili
+		replace b_resp_lang_swahili = (b_resp_language == 1) if b_resp_lang_swahili == .
+	gen b_radio_any = b_radio_any_3mon
+		replace b_radio_any = cm1_media_radio_ever if b_radio_any == .
+	gen b_asset_cell = b_s16q5 	
+		replace b_asset_cell = cm1_assets_cell if b_asset_cell == .
+	gen b_asset_tv = b_s16q3 
+		replace b_asset_tv =  cm1_assets_tv if b_asset_tv == .
+	gen b_asset_radio_num = b_s16q2
+		replace b_asset_radio_num = 0 if b_s16q1 == 0
+		replace b_asset_radio_num = cm1_assets_radio_num if b_asset_radio_num == .
 		
 /* Create indices ______________________________________________________________*/
 

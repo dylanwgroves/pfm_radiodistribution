@@ -37,7 +37,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	2
+		global rerandcount	5
 							;
 		
 		
@@ -61,9 +61,12 @@ ________________________________________________________________________________
 					
 		/* Indices */			
 		global index_list	
-							values
-							
-							
+							takeup
+							stations
+							topics
+							gender
+							wpp
+							ipv
 							/*
 							takeup
 							stations
@@ -75,6 +78,7 @@ ________________________________________________________________________________
 							pknow
 							trust
 							responsibility
+							val
 							prej_thermo
 							healthknow
 							enviroknow 
@@ -119,7 +123,7 @@ foreach index of global index_list {
 				
 		/* Set Put Excel File Name */
 		putexcel clear
-		putexcel set "X:\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}.xlsx", sheet(`index', replace) modify
+		putexcel set "X:\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}_update.xlsx", sheet(`index', replace) modify
 		
 		qui putexcel A1 = ("variable")
 		qui putexcel B1 = ("variablelabel")
@@ -166,7 +170,7 @@ foreach index of global index_list {
 		di "********************************************************************"
 		di "THE VARIABLE IS `dv'"
 		di "********************************************************************"
-		
+				
 		/* set test */
 		if strpos("$twosided", "`dv'") { 
 			global test twosided
@@ -235,13 +239,13 @@ foreach index of global index_list {
 
 	
 		if ${lasso_ctls_num} != 0 {												// If lassovars selected	
-			qui regress ${dv} treat ${cov_always} ${lasso_ctls}
+			qui regress ${dv} treat ${lasso_ctls}
 				matrix table = r(table)
 			}
 			
 			else if ${lasso_ctls_num} == 0 {									// If no lassovars selected
-				qui regress ${dv} treat ${cov_always}
-					matrix table = r(table)
+				qui regress ${dv} treat 
+					matrix table = r(table)	
 			}	
 		
 			/* Save Coefficient */
@@ -269,8 +273,8 @@ foreach index of global index_list {
 	/* Export to Excel _________________________________________________________*/ 
 		
 		di "Variable is ${varname}, coefficient is ${coef}, pval is ${pval} / ripval is ${ripval}, N = ${n}"
-		*di "LASSO: Variable is ${varname}, coefficient is ${lasso_coef}, lasso pval is ${lasso_pval} / lasso ripval is ${lasso_ripval}, N = ${lasso_n}"
-		*di "LASSO vars were ${lasso_ctls}"
+		di "LASSO: Variable is ${varname}, coefficient is ${lasso_coef}, lasso pval is ${lasso_pval} / lasso ripval is ${lasso_ripval}, N = ${lasso_n}"
+		di "LASSO vars were ${lasso_ctls}"
 
 		cap qui putexcel A`row' = ("${varname}")
 		cap qui putexcel B`row' = ("${varlabel}")
