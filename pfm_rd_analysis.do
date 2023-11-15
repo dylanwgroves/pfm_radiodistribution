@@ -37,7 +37,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	5
+		global rerandcount	2000
 							;
 		
 		
