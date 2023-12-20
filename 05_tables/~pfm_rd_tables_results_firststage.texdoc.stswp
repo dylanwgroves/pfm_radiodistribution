@@ -24,12 +24,13 @@ ________________________________________________________________________________
 
 /* Load Data ___________________________________________________________________*/	
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_practice.xlsx", sheet("comply") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("comply") firstrow clear
 	save `dta_main', replace
 	
 	import excel "${rd_tables}/pfm_rd_analysis_main_practice.xlsx", sheet("firststage") firstrow clear
 	append using `dta_main', force
-	stop
+	save `dta_main', replace
+
 	
 /* Sort Data ___________________________________________________________________*/
 
@@ -49,10 +50,9 @@ ________________________________________________________________________________
 	/* Individual Data */
 	local sumstat_vars 	rd_receive ///
 						rd_stillhave ///
-						radio_ever	///
 						rd_radio_3months_dum ///
 						rd_radio_2wks_dum ///
-						rd_radio_1day_dum
+						rd_radio_1day_dum 
 
 	gen rank = .
 	local i = 1
@@ -65,16 +65,26 @@ ________________________________________________________________________________
 	drop if rank == .
 	gsort rank
 
+	
+/* Variable lables _____________________________________________________________*/
+	
+	replace variablelabel = "Received?" if variable == "rd_receive"
+	replace variablelabel = "Still have?" if variable == "rd_stillhave"
+	replace variablelabel = "3 months" if variable == "rd_radio_3months_dum"
+	replace variablelabel = "2 weeks" if variable == "rd_radio_2wks_dum"
+	replace variablelabel = "1 day" if variable == "rd_radio_1day_dum"
 
 /* Create variables ____________________________________________________________*/
 	
-	macro drop var* b* se* p* c* sd* mn* mx* r2* n*
-	
+	forval i = 1/$count {
+		macro drop var`i' b`i' se`i' p`i' c`i' sd`i' mn`i' mx`i' r2`i' n`i'
+	}
+			
 	count
 	global count = `r(N)'
 	
 	forval i = 1/$count {
-
+		
 		global var`i' = variablelabel[`i']
 		global b`i' = strofreal(coef[`i'], "%6.3f")
 		global se`i' = strofreal(se[`i'], "%6.3f")
@@ -95,27 +105,27 @@ ________________________________________________________________________________
 
 /* Make Table __________________________________________________________________*/
 
-texdoc init "${rd_clean_tables}/pfm_rd_tables_uptake.tex", replace nolog
+texdoc init "${rd_clean_tables}/pfm_rd_tables_firststage.tex", replace nolog
 
 texdoc write 	{
 texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 texdoc write 	\begin{tabular}{l*{8}{c}}
 texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	 	
-texdoc write   								&\multicolumn{2}{c}{Received Radio}						&\multicolumn{4}{c}{Listen to Radio} 									\\ \cmidrule(r){2-3} \cmidrule(l){4-7}		 
-texdoc write        	     				& $var1 			& $var2			& $var3 			& $var4					& $var5 				& $var6					\tstrut \bstrut  \\
+texdoc write   								&\multicolumn{2}{c}{Uptake}			&\multicolumn{3}{c}{Listened to any radio in...} 									\\ \cmidrule(r){2-3} \cmidrule(l){4-6}		 
+texdoc write        	     				& $var1 			& $var2			& $var3 			& $var4					& $var5 						\tstrut \bstrut  \\
 texdoc write 	\hline
-texdoc write 	Treatment     				& $b1\sym{$s1}  	& $b2\sym{$s2} 	& $b3\sym{$s3} 		& $b4\sym{$s4}			& $b5\sym{$s5} 			& $b6\sym{$s6}			\\
-texdoc write    Standard Error 				& $se1				& $se2			& $se3    			& $se4  				& $se5 					& $se6					\\
+texdoc write 	Treatment     				& $b1\sym{$s1}  	& $b2\sym{$s2} 	& $b3\sym{$s3} 		& $b4\sym{$s4}			& $b5\sym{$s5} 					\\
+texdoc write    Standard Error 				& $se1				& $se2			& $se3    			& $se4  				& $se5 							\\
 texdoc write 	\hline
-texdoc write 	RI \$p\$-value 				& $p1				& $p2 			& $p3				& $p4					& $p5  					& $p6					\\
-texdoc write 	Hypothesis					& \textbf{+}		& \textbf{+} 	& \textbf{+}		& \textbf{+} 			& \textbf{+}			& \textbf{+}			\\
-texdoc write 	Control Mean      			& $c1				& $c2			& $c3 				& $c4					& $c5  					& $c6					\\
-texdoc write 	Control SD					& $sd1				& $sd2			& $sd3				& $sd4					& $sd5 					& $sd6					\\
-texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2] 	& [$mn3-$mx3]		& [$mn4-$mx4]			& [$mn5-$mx5] 			& [$mn6-$mx6]			\\	
-texdoc write 	Blocked FE 					& Yes 				& Yes 			&  Yes   			& Yes  					& Yes					& Yes					\\
-texdoc write 	Controls 					& No 				& No 			&  No   			& No  					& No					& No 					\\
-texdoc write 	Adj-\$ R^2\$				& $r21 				& $r22 			& $r23   			& $r24 					& $r25					& $r26					\\
-texdoc write 	Observations      			& $n1 				& $n2 			& $n3   			& $n4 					& $n5					& $n6					\\
+texdoc write 	RI \$p\$-value 				& $p1				& $p2 			& $p3				& $p4					& $p5  							\\
+texdoc write 	Hypothesis					& \textbf{+}		& \textbf{+} 	& \textbf{+}		& \textbf{+} 			& \textbf{+}					\\
+texdoc write 	Control Mean      			& $c1				& $c2			& $c3 				& $c4					& $c5  							\\
+texdoc write 	Control SD					& $sd1				& $sd2			& $sd3				& $sd4					& $sd5 							\\
+texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2] 	& [$mn3-$mx3]		& [$mn4-$mx4]			& [$mn5-$mx5] 					\\	
+texdoc write 	Blocked FE 					& Yes 				& Yes 			&  Yes   			& Yes  					& Yes							\\
+texdoc write 	Controls 					& No 				& No 			&  No   			& No  					& No							\\
+texdoc write 	Adj-\$ R^2\$				& $r21 				& $r22 			& $r23   			& $r24 					& $r25							\\
+texdoc write 	Observations      			& $n1 				& $n2 			& $n3   			& $n4 					& $n5							\\
 texdoc write 	\Xhline{2\arrayrulewidth}
 texdoc write 	\end{tabular}
 texdoc write 	}

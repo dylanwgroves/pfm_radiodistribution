@@ -23,16 +23,23 @@ ________________________________________________________________________________
 
 /* Load Data ___________________________________________________________________*/	
 
-	import excel "${rd_tables}/pfm_rd_balance.xlsx", sheet("Sheet1") firstrow
+	import excel "${rd_tables}/pfm_rd_analysis_main_practice.xlsx", sheet("covars") firstrow
 	
 
 /* Sort Data ___________________________________________________________________*/
 
+
 sort pval
-destring treatmean treatsd controlmean controlsd coef pval ripval min max N, replace
+destring treat_mean treat_sd ctl_mean ctl_sd coef pval ripval min max N, replace
+drop if ctl_mean < 0.1
 
 
-
+/* Labels */
+replace variablelabel = "Tribe: Sambaa" if variable == "b_resp_tribe_sambaa"
+replace variablelabel = "Tribe: Zigua" if variable == "b_resp_tribe_zigua"
+replace variablelabel = "Tribe: Digo" if variable == "b_resp_tribe_digo"
+replace variablelabel = "Female" if variable == "b_resp_female"
+replace variablelabel = "Religious services per week" if variable == "b_resp_religiosity"
 
 /* Load pval ___________________________________________________________________*/
 
@@ -42,23 +49,26 @@ destring treatmean treatsd controlmean controlsd coef pval ripval min max N, rep
 	forval i = 1/`count' {
 
 		local var_`i' = variablelabel[`i']
-		local t_mean_`i' = strofreal(treatmean[`i'], "%6.3f")
-		local c_mean_`i' = strofreal(controlmean[`i'], "%6.3f")
-		local pval_`i' = strofreal(ripval[`i'], "%6.3f")
+		local t_mean_`i' = strofreal(treat_mean[`i'], "%6.3f")
+		local c_mean_`i' = strofreal(ctl_mean[`i'], "%6.3f")
+		local pval_`i' = strofreal(pval[`i'], "%6.3f")
 		local n_`i' = strofreal(N[`i'], "%6.0fc")
 	
 	}
 
+
+
+
 /* Load pval ___________________________________________________________________*/
 
 
-texdoc init "${rd_clean_tables}/pfm_rd_tables_01_balance.tex", replace nolog
+texdoc init "${rd_clean_tables}/pfm_rd_tables_balance.tex", replace nolog
 
 texdoc write 	{
 texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-texdoc write 	\begin{tabular}{l *{4}{d{3.3}} }
+texdoc write 	\begin{tabular}{l *{3}{d{3.3}} c}
 texdoc write 	\hline
-texdoc write    \multicolumn{1}{c}{\text{Variable}} & \multicolumn{1}{c}{\text{Treatment}} 	& \multicolumn{1}{c}{\text{Comparison}} 	& \multicolumn{1}{c}{\text{RI $p$ -value}} & \multicolumn{1}{c}{\text{Observations}} \\
+texdoc write    \multicolumn{1}{c}{\text{Variable}} & \multicolumn{1}{c}{\text{Treatment}} 	& \multicolumn{1}{c}{\text{Comparison}} 	& \multicolumn{1}{c}{\text{RI \$p\$-value}} & \multicolumn{1}{c}{\text{Obs.}} \\
 texdoc write 	\hline
 texdoc write 	\text{`var_1'}				&	`t_mean_1'				& `c_mean_1'				& `pval_1'				& `n_1'				\\
 texdoc write 	\text{`var_2'}       		&	`t_mean_2'				& `c_mean_2'				& `pval_2'				& `n_2'				\\
@@ -84,12 +94,6 @@ texdoc write 	\text{`var_21'}	       		&	`t_mean_21'				& `c_mean_21'				& `pval
 texdoc write 	\text{`var_22'}	       		&	`t_mean_22'				& `c_mean_22'				& `pval_22'				& `n_22'			\\
 texdoc write 	\text{`var_23'}	       		&	`t_mean_23'				& `c_mean_23'				& `pval_23'				& `n_23'			\\
 texdoc write 	\text{`var_24'}	       		&	`t_mean_24'				& `c_mean_24'				& `pval_24'				& `n_24'			\\
-texdoc write 	\text{`var_25'}	       		&	`t_mean_25'				& `c_mean_25'				& `pval_25'				& `n_25'			\\
-texdoc write 	\text{`var_26'}	       		&	`t_mean_26'				& `c_mean_26'				& `pval_26'				& `n_26'			\\
-texdoc write 	\text{`var_27'}	       		&	`t_mean_27'				& `c_mean_27'				& `pval_27'				& `n_27'			\\
-texdoc write 	\text{`var_28'}	       		&	`t_mean_28'				& `c_mean_28'				& `pval_28'				& `n_28'			\\
-texdoc write 	\text{`var_29'}	       		&	`t_mean_29'				& `c_mean_29'				& `pval_29'				& `n_29'			\\
-texdoc write 	\text{`var_30'}	       		&	`t_mean_30'				& `c_mean_30'				& `pval_30'				& `n_30'			\\
 texdoc write 	\hline
 
 texdoc write 	\end{tabular}

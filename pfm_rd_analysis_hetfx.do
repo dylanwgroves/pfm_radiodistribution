@@ -37,10 +37,10 @@ ________________________________________________________________________________
 		set seed 			1956
 							;
 							
-		/* rerandomization count 
-		global rerandcount	10
+		/* rerandomization count */
+		global rerandcount	1
 							;
-		*/
+		
 		
 		/* sample */
 		global sample		all
@@ -59,36 +59,56 @@ ________________________________________________________________________________
 							friend
 							kid
 							*/
-							
-							
-		/* hetfxvar */
-		global interact 	resp_female
+				
+		global interact		b_resp_muslim
 							;
-					
-		/* Indices */			
-		global index_list	
 							
-							stations
-							/*
-							takeup
+		/* Indices */			
+		global index_list	comply 
+							firststage
 							stations
 							topics
+							enviroknow
 							gender
 							wpp
 							ipv
-							em
-							ccm
-							prej_nbr
-							prej_marry
-							values
-							pint
+							open_nbr
+							open_marry
+							open_thermo
+							identity
 							ppart
-							pknow
+							pknow 
+							presponsibility
+							ptrust
 							crime
-							healthknow
+							crime_report 
+							ccm
+							/*
+							covars
+							comply 
+							firststage
+							stations
+							topics
 							enviroknow
-							responsibility
-							trust
+							gender
+							wpp
+							ipv
+							open_nbr
+							open_marry
+							open_thermo
+							identity
+							ppart
+							pknow 
+							presponsibility
+							ptrust
+							crime
+							crime_report 
+							ccm
+							
+
+							healthknow
+							enviroknow 
+							em
 							*/
 							;
 	#d cr
@@ -97,14 +117,19 @@ ________________________________________________________________________________
 /* Run Do File ______________________________________________________________*/
 
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_indices_${survey}.do"
-	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
+	*do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_twosided.do"
 
 
 
-/* Run Do File ______________________________________________________________*/
+/* Keep Target Data ____________________________________________________________*/
 
-	keep if sample == "$sample" | all == "$sample"
+	keep if ${sample} == "yes" 
+	
+	
+/* Set treatment variable ______________________________________________________*/
+
+	clonevar treat = t_rd
 	
 	
 /* Create Interaction Term _____________________________________________________*/
@@ -146,20 +171,20 @@ foreach index of global index_list {
 		qui putexcel E1 = ("pval")
 		qui putexcel F1 = ("ripval")
 
-		qui putexcel G1 = ("c_coef")
-		qui putexcel H1 = ("c_se")
-		qui putexcel I1 = ("c_pval")
-		qui putexcel J1 = ("c_ripval")
+		qui putexcel G1 = ("m_coef")
+		qui putexcel H1 = ("m_se")
+		qui putexcel I1 = ("m_pval")
+		qui putexcel J1 = ("m_ripval")
 
 		qui putexcel K1 = ("x_coef")
 		qui putexcel L1 = ("x_se")
 		qui putexcel M1 = ("x_pval")
 		qui putexcel N1 = ("x_ripval")
 
-		qui putexcel O1 = ("m_coef")
-		qui putexcel P1 = ("m_se")
-		qui putexcel Q1 = ("m_pval")
-		qui putexcel R1 = ("m_ripval")
+		qui putexcel O1 = ("c_coef")
+		qui putexcel P1 = ("c_se")
+		qui putexcel Q1 = ("c_pval")
+		qui putexcel R1 = ("c_ripval")
 
 		qui putexcel S1 = ("r2")
 		qui putexcel T1 = ("n")
@@ -289,6 +314,7 @@ foreach index of global index_list {
 
 		xi: reg ${dv} treat##covar													// This is the core regression
 			matrix table = r(table)
+			matrix list table 
 
 			/* Save values from regression */
 			global coef 	= table[1,2]    	//beta

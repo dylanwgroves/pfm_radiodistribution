@@ -39,7 +39,8 @@ if "$test" == "twosided" {
 }
 	
 	
-	drop rd_treat_* l_merge 
+	drop rd_treat_* 
 	global helper_ripval = `rip_count' / $rerandcount
 		
 	
+	drop 

@@ -24,10 +24,10 @@ ________________________________________________________________________________
 
 /* Load Data ___________________________________________________________________*/	
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_practice.xlsx", sheet("comply") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("comply") firstrow clear
 	save `dta_main', replace
 	
-	import excel "${rd_tables}/pfm_rd_analysis_main_practice.xlsx", sheet("firststage") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("firststage") firstrow clear
 	append using `dta_main', force
 	stop
 	

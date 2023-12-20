@@ -45,6 +45,10 @@ ________________________________________________________________________________
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_firststage_topics.texdoc"
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_firststage_stations.texdoc"
 	
+	* results
+	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_crime.texdoc"
+	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_crime_report.texdoc"
+
 	
 	
 	texdoc do "${code}/pfm_radiodistribution/pfm_rd_04_tables_samplesum.texdoc"

@@ -14,6 +14,7 @@ ________________________________________________________________________________
 	clear mata
 	set more off
 	global c_date = c(current_date)
+	set maxvar 30000
 	set seed 1956
 
 	
@@ -37,7 +38,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	2000
+		global rerandcount	1
 							;
 		
 		
@@ -60,26 +61,33 @@ ________________________________________________________________________________
 							*/
 					
 		/* Indices */			
-		global index_list	
-							takeup
-							stations
-							topics
-							gender
-							wpp
-							ipv
+		global index_list	ipv 
+							open_nbr 
+							open_marry 
+							open_thermo
 							/*
-							takeup
+							covars
+							comply 
+							firststage
 							stations
 							topics
+							enviroknow
 							gender
 							wpp
 							ipv
-							ppref
-							pknow
-							trust
-							responsibility
-							values
-							prej_thermo
+							open_nbr
+							open_marry
+							open_thermo
+							identity
+							ppart
+							pknow 
+							presponsibility
+							ptrust
+							crime
+							crime_report 
+							ccm
+							
+
 							healthknow
 							enviroknow 
 							em
@@ -90,15 +98,43 @@ ________________________________________________________________________________
 	
 /* Run Do File ______________________________________________________________*/
 
-	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_indices_${survey}.do"
-	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
+	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_indices_main.do"
+	*do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_labels.do"
 	do "X:\Documents/pfm_radiodistribution/02_indices/pfm_rd_twosided.do"
+	
+	
+/* Set treatment variable ______________________________________________________*/
+
+	clonevar treat = t_rd
+	encode id_village_uid, gen(id_village_uid_c)
 
 
+/* Standardize and replace covars ______________________________________________
 
-/* Run Do File ______________________________________________________________*/
+	foreach var of global covars {	
+		
+		egen std_`var' = std(`var')
+		replace `var' = std_`var'
+		drop std_*
+		
+		replace `var' = 0 if missing(`var')
+		
+		/* other options is to remove those variables
+		count if missing(`var')
+		if r(N) == _N drop `var'
+		*/
+	}
+	
+	/*
+	ds b_*
+	local vars `r(varlist)'
+	global covars `vars'
+	*/
+*/	
+/* Keep Target Data ____________________________________________________________*/
 
-	keep if sample == "$sample" | all == "$sample"
+	keep if ${sample} == "yes" 
+
 	
 /* Run for Each Index __________________________________________________________*/
 
@@ -123,7 +159,7 @@ foreach index of global index_list {
 				
 		/* Set Put Excel File Name */
 		putexcel clear
-		putexcel set "X:\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}_update.xlsx", sheet(`index', replace) modify
+		putexcel set "X:\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}_gender.xlsx", sheet(`index', replace) modify
 		
 		qui putexcel A1 = ("variable")
 		qui putexcel B1 = ("variablelabel")
@@ -180,31 +216,31 @@ foreach index of global index_list {
 			}
 		
 		/* Variable name */
-		qui ds `dv'
+		qui ds ${dv}
 			global varname = "`r(varlist)'"  
 
 		/* Variable label */
-		global varlabel : var label `dv'
+		global varlabel : var label ${dv}
 		
 		/* Treatment mean */
-		qui sum ${dv} if treat == 0 
+		sum ${dv} if treat == 0 
 			global ctl_mean `r(mean)'
 			global ctl_sd `r(sd)'
 
 		/* Control mean */
-		qui sum ${dv} if treat == 1 
+		sum ${dv} if treat == 1 
 			global treat_mean `r(mean)'
 			global treat_sd `r(sd)'
 			
 		/* Control village sd */
 		preserve
 		qui collapse (mean) ${dv} treat, by(id_village_uid)
-		qui sum ${dv} if treat == 0
+		sum ${dv} if treat == 0
 			global vill_sd : di %6.3f r(sd)
 		restore
 
 		/* Variable range */	
-		qui sum ${dv} 
+		sum ${dv} 
 			global min = r(min)
 			global max = r(max)
 			
@@ -226,25 +262,45 @@ foreach index of global index_list {
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval.do"
 			global pval = ${helper_pval}
 			
-			/* Calculate RI-pvalue */
+			/* Calculate RI-pvalue 
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri.do"
 			global ripval = ${helper_ripval}
+			*/
 			
+		reg ${dv} treat ${cov_always} if b_resp_female == 0												// This is the core regression ${cov_always}
+			matrix table = r(table)
 			
-	/* Lasso Regression  _______________________________________________________*/
+			/* Save values from regression */
+			global m_coef 	= table[1,1]    	//beta
+			global m_se 	= table[2,1]		//pval
+			global m_p 		= table[4,1]/2		//pval
+			
+		reg ${dv} treat ${cov_always} if b_resp_female == 1												// This is the core regression ${cov_always}
+			matrix table = r(table)
+			
+			/* Save values from regression */
+			global f_coef 	= table[1,1]    	//beta
+			global f_se 	= table[2,1]		//pval
+			global f_p 		= table[4,1]/2		//pval
 
-		qui lasso linear ${dv} ${cov_lasso}										// set this up as a separate do file
+
+			
+	/* Lasso Regression  _______________________________________________________
+
+	if "${index_list}" != "covars"	{
+	
+		qui lasso linear ${dv} ${covars}										// set this up as a separate do file
 			global lasso_ctls = e(allvars_sel)										
 			global lasso_ctls_num = e(k_nonzero_sel)
 
 	
 		if ${lasso_ctls_num} != 0 {												// If lassovars selected	
-			qui regress ${dv} treat ${lasso_ctls}
+			qui regress ${dv} treat ${lasso_ctls} ${cov_always}
 				matrix table = r(table)
 			}
 			
 			else if ${lasso_ctls_num} == 0 {									// If no lassovars selected
-				qui regress ${dv} treat 
+				qui regress ${dv} treat ${cov_always}
 					matrix table = r(table)	
 			}	
 		
@@ -266,7 +322,8 @@ foreach index of global index_list {
 			/* Calculate Lasso RI-pvalue */
 			do "X:/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri_lasso.do"
 			global lasso_ripval = ${helper_lasso_ripval}
-			
+	*/	
+	
 		** Capture time
 		global date = c(current_date)
 		
@@ -306,6 +363,12 @@ foreach index of global index_list {
 		cap qui putexcel Y`row' = ("${lasso_ctls_num_replacement}")
 		cap qui putexcel Z`row' = ("${test}")
 		cap qui putexcel AA`row' = ("${date}")
+		
+		cap qui putexcel AB`row' = ("${m_coef}")
+		cap qui putexcel AC`row' = ("${m_p}")
+		
+		cap qui putexcel AD`row' = ("${f_coef}")
+		cap qui putexcel AE`row' = ("${f_p}")
 		
 		/* Update locals ___________________________________________________________*/
 		
