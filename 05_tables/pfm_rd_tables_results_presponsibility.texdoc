@@ -33,6 +33,8 @@ ________________________________________________________________________________
 
 
 	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("presponsibility") firstrow clear
+		cap rename A variable 
+
 	save `dta_main', replace
 	
 
@@ -58,6 +60,8 @@ ________________________________________________________________________________
 						;
 	#d cr 
 
+	tostring variablelabel, replace
+
 	gen rank = .
 	local i = 1
 	
@@ -72,11 +76,12 @@ ________________________________________________________________________________
 	
 /* Variable lables _____________________________________________________________*/
 	
-	tostring variablelabel, replace
 	replace variablelabel = "Villagers" if variable == "presponsibility_vill"
-	replace variablelabel = "Government index" if variable == "presponsibility_gov"
-	replace variablelabel = "Local Government" if variable == "presponsibility_lga"
-	replace variablelabel = "National Government" if variable == "presponsibility_natl"
+		replace ripval = 1 - pval if variable == "presponsibility_vill"
+	replace variablelabel = "Gov. index" if variable == "presponsibility_gov"
+	replace variablelabel = "Local Gov." if variable == "presponsibility_lga"
+	replace variablelabel = "National Gov." if variable == "presponsibility_natl"
+		replace ripval = pval if variable != "presponsibility_vill"
 
 
 /* Create variables ____________________________________________________________*/
@@ -128,7 +133,7 @@ texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 texdoc write 	\begin{tabular}{l*{16}{c}}
 texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	
 
-texdoc write    							& 					&   \multicolumn{3}{c}{Government}  \tstrut \bstrut \\ \cmidrule(r){2-2} \cmidrule(r){3-5} 
+texdoc write    							& 	\multicolumn{4}{c}{Who has primary responsibility for development?}  \tstrut \bstrut \\ \cmidrule(r){2-2} \cmidrule(r){3-5} 
 
 texdoc write    							& $var1				& $var2    		& $var3 		& $var4 			\\ 
 texdoc write 	\hline
@@ -136,7 +141,7 @@ texdoc write 	Treatment      				& $b1\sym{$s1}   	& $b2\sym{$s2}  & $b3\sym{$s3
 texdoc write    Standard Error 				& $se1				& $se2    		& $se3 			& $se4 				\\
 texdoc write 	\hline
 texdoc write 	RI \$p\$-value 				& $p1				& $p2			& $p3  			& $p4				\\
-texdoc write 	Hypothesis					& +					& +				& +				& +					\\
+texdoc write 	Hypothesis					& +/-					& +				& +				& +					\\
 texdoc write 	Control Mean      			& $c1				& $c2			& $c3  			& $c4				\\
 texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			& $sd4				\\
 texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	& [$mn4-$mx4]		\\	

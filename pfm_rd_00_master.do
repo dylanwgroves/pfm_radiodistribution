@@ -46,6 +46,17 @@ ________________________________________________________________________________
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_firststage_stations.texdoc"
 	
 	
+	* political knowledge and participation 
+	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_ppart.texdoc"
+	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_pknow.texdoc"
+	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_presponsibility.texdoc"
+	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_ptrust.texdoc"
+	
+	
+
+	* political responsibiltiy
+	
+	
 	
 	texdoc do "${code}/pfm_radiodistribution/pfm_rd_04_tables_samplesum.texdoc"
 	texdoc do "${code}/pfm_radiodistribution/pfm_rd_04_tables_02_uptake.texdoc"

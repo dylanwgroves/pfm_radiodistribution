@@ -1,9 +1,10 @@
 
 
 /* Calculate Lasso RI p-value */
-merge 1:1 id_resp_uid using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_ri.dta", gen(m_merge)
-	drop if m_merge != 3
+merge 1:1 id_resp_uid using "${user}/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_ri.dta", gen(l_merge)
+	keep if l_merge == 3
 	keep if !missing(rd_treat_1)
+
 	
 /* one-sided */
 if "$test" == "onesided" {
@@ -27,6 +28,7 @@ if "$test" == "onesided" {
 			if ${lasso_coef} < `lasso_coef_ri' { 	  
 					local lasso_rip_count = `lasso_rip_count' + 1	
 			}
+	di "`k'"
 	}
 }
 
@@ -54,9 +56,10 @@ if "$test" == "twosided" {
 			if abs(${lasso_coef}) < abs(`lasso_coef_ri') { 	  
 						local lasso_rip_count = `lasso_rip_count' + 1	
 			}
+	di "`k'"		
 	}
 }
 
-	drop rd_treat_* m_merge
+	drop rd_treat_* l_merge
 	global helper_lasso_ripval = `lasso_rip_count' / $rerandcount
 	

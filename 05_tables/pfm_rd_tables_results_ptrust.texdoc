@@ -24,12 +24,18 @@ ________________________________________________________________________________
 	do "${code}/pfm_ne/pfm_ne_prelim.do"
 */
 
+/* Set table name ______________________________________________________________*/
+
+	local tablename "${rd_clean_tables}/pfm_rd_tables_results_ptrust.tex"
+	
+	
 /* Load Data ___________________________________________________________________*/	
 
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("crime") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("ptrust") firstrow clear
+		cap rename A variable 
+
 	save `dta_main', replace
-	
 	
 
 /* Sort Data ___________________________________________________________________*/
@@ -47,17 +53,14 @@ ________________________________________________________________________________
 	/* Individual Data */
 	# d ;
 	local sumstat_vars 	
-						pknow_index
-						pknow_ports
-						pknow_vp
-						pknow_ruto
-						pknow_kenyatta
-						pknow_justice
-						pknow_pm
-						pknow_em
-
+						ptrust_lga
+						ptrust_natl
+						ptrust_relig
+						ptrust_radio
 						;
 	#d cr 
+
+	tostring variablelabel, replace
 
 	gen rank = .
 	local i = 1
@@ -73,17 +76,11 @@ ________________________________________________________________________________
 	
 /* Variable lables _____________________________________________________________*/
 	
-	tostring variablelabel, replace
-	replace variablelabel = "Index" if variable == "crime_index"
-	replace variablelabel = "Pref. Rank" if variable == "crime_ppref"
-	replace variablelabel = "Vote" if variable == "crime_vote"
-	replace variablelabel = "Local" if variable == "crime_local"
-	replace variablelabel = "Nat'l" if variable == "crime_natl"
-	replace variablelabel = "Boda" if variable == "crime_bodarisky"
-	replace variablelabel = "Travel" if variable == "crime_travelrisky"
-	replace variablelabel = "Party Alone" if variable == "crime_nopartyalone"
-	replace variablelabel = "Night Walk" if variable == "crime_walklongway"
-
+	replace variablelabel = "Local Gov." if variable == "ptrust_lga"
+	replace variablelabel = "Nat'l Gov." if variable == "ptrust_natl"
+	replace variablelabel = "Radio" if variable == "ptrust_radio"
+	replace variablelabel = "Religion" if variable == "ptrust_relig"		
+		
 
 /* Create variables ____________________________________________________________*/
 
@@ -127,34 +124,35 @@ ________________________________________________________________________________
 	
 /* Make Table __________________________________________________________________*/
 
-texdoc init "${rd_clean_tables}/pfm_rd_tables_results_crime.tex", replace nolog
+texdoc init "`tablename'", replace nolog
 
 texdoc write 	{
 texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 texdoc write 	\begin{tabular}{l*{16}{c}}
 texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	
 
-texdoc write    							&					& 				& \multicolumn{2}{c}{Crime Perception} &   \multicolumn{2}{c}{Risk Perception} &   \multicolumn{2}{c}{Avoid} \tstrut \bstrut \\ \cmidrule(r){4-5} \cmidrule(r){6-7} \cmidrule(r){8-9} 
+texdoc write    							& 	\multicolumn{4}{c}{Who do you trust most?}  \tstrut \bstrut \\ \cmidrule(r){2-5} 
 
-texdoc write    							& $var1				& $var2    		& $var3 		& $var4 		& $var5			& $var6			& $var7				& $var8			\\ 
+texdoc write    							& $var1				& $var2    		& $var3 		& $var4 			\\ 
 texdoc write 	\hline
-texdoc write 	Treatment      				& $b1\sym{$s1}   	& $b2\sym{$s2}  & $b3\sym{$s3} 	& $b4\sym{$s4}	& $b5\sym{$s5}	& $b6\sym{$s6}	& $b7\sym{$s7}		& $b8\sym{$s8}	\\
-texdoc write    Standard Error 				& $se1				& $se2    		& $se3 			& $se4 			& $se5			& $se6			& $se7				& $se8			\\
+texdoc write 	Treatment      				& $b1\sym{$s1}   	& $b2\sym{$s2}  & $b3\sym{$s3} 	& $b4\sym{$s4}		\\
+texdoc write    Standard Error 				& $se1				& $se2    		& $se3 			& $se4 				\\
 texdoc write 	\hline
-texdoc write 	RI \$p\$-value 				& $p1				& $p2			& $p3  			& $p4			& $p5			& $p6			& $p7				& $p8			\\
-texdoc write 	Hypothesis					& +					& +				& +				& +				& +				& +				& +					& +			\\
-texdoc write 	Control Mean      			& $c1				& $c2			& $c3  			& $c4			& $c5			& $c6			& $c7				& $c8			\\
-texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			& $sd4			& $sd5			& $sd6			& $sd7				& $sd8			\\
-texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	& [$mn4-$mx4]	& [$mn5-$mx5] 	& [$mn6-$mx6] 	& [$mn7-$mx7] 		& [$mn8-$mx8] 		\\	
-texdoc write 	Blocked FE 					& Yes 				&  Yes   		& Yes			& Yes			& Yes			& Yes			& Yes				& Yes				\\
-texdoc write 	Controls 					& $ctl1 			&  $ctl2   		& $ctl3			& $ctl4			& $ctl5			& $ctl6			& $ctl7				& $ctl8				\\
-texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2   		& $r3			& $r4			& $r6			& $r6			& $r7				& $r8					\\
-texdoc write 	Observations      			& $n1 				& $n2   		& $n3			& $n4			& $n6			& $n6			& $n7				& $n8			\\
+texdoc write 	RI \$p\$-value 				& $p1				& $p2			& $p3  			& $p4				\\
+texdoc write 	Hypothesis					& +					& +				& +				& +					\\
+texdoc write 	Control Mean      			& $c1				& $c2			& $c3  			& $c4				\\
+texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			& $sd4				\\
+texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	& [$mn4-$mx4]		\\	
+texdoc write 	Blocked FE 					& Yes 				&  Yes   		& Yes			& Yes				\\
+texdoc write 	Controls 					& $ctl1 			&  $ctl2   		& $ctl3			& $ctl4				\\
+texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2   		& $r3			& $r4				\\
+texdoc write 	Observations      			& $n1 				& $n2   		& $n3			& $n4				\\
 texdoc write 	\Xhline{2\arrayrulewidth}
 texdoc write 	\end{tabular}
 texdoc write 	}
 
 texdoc close
+
 
 
 

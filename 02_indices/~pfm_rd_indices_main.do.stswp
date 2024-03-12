@@ -67,7 +67,7 @@ ________________________________________________________________________________
 							radio_type_music 
 							radio_type_sports 
 							radio_type_news 
-							radio_type_romance
+							radio_type_ro
 							radio_type_social 
 							radio_type_relig
 							;
@@ -223,7 +223,8 @@ ________________________________________________________________________________
 							;
 
 							
-		global healthknow 	
+		global healthknow 	healthknow_index 
+							hivknow_index 
 							healthknow_notradmed 
 							healthknow_nowitchcraft 
 							healthknow_vaccines 
@@ -237,6 +238,7 @@ ________________________________________________________________________________
 							;
 							
 		global hivdisclose	hivdisclose_index 
+							hivdisclose_fam 
 							hivdisclose_friend 
 							hivdisclose_cowork 
 							hivdisclose_nosecret 

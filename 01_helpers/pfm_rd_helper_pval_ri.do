@@ -1,11 +1,12 @@
 	
 /* Calculate RI p-value */
 
-merge 1:1 id_resp_uid using "X:/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_ri.dta", gen(l_merge)
+
+merge 1:1 id_resp_uid using "${user}/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_ri.dta", gen(l_merge)
 	keep if l_merge == 3
 	keep if !missing(rd_treat_1)
-	
 
+	
 if "$test" == "onesided" {
 
 	/* one sided */
@@ -43,3 +44,6 @@ if "$test" == "twosided" {
 	global helper_ripval = `rip_count' / $rerandcount
 		
 	
+
+	
+use "${user}/Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_ri.dta", clear

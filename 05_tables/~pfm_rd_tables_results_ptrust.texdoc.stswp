@@ -26,13 +26,15 @@ ________________________________________________________________________________
 
 /* Set table name ______________________________________________________________*/
 
-	local tablename "${rd_clean_tables}/pfm_rd_tables_results_presponsibility.tex"
+	local tablename "${rd_clean_tables}/pfm_rd_tables_results_ptrust.tex"
 	
 	
 /* Load Data ___________________________________________________________________*/	
 
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("presponsibility") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("ptrust") firstrow clear
+		cap rename A variable 
+
 	save `dta_main', replace
 	
 
@@ -51,12 +53,14 @@ ________________________________________________________________________________
 	/* Individual Data */
 	# d ;
 	local sumstat_vars 	
-						presponsibility_vill
-						presponsibility_gov
-						presponsibility_lga
-						presponsibility_natl
+						ptrust_lga
+						ptrust_natl
+						ptrust_relig
+						ptrust_radio
 						;
 	#d cr 
+
+	tostring variablelabel, replace
 
 	gen rank = .
 	local i = 1
@@ -72,12 +76,11 @@ ________________________________________________________________________________
 	
 /* Variable lables _____________________________________________________________*/
 	
-	tostring variablelabel, replace
-	replace variablelabel = "Villagers" if variable == "presponsibility_vill"
-	replace variablelabel = "Government index" if variable == "presponsibility_gov"
-	replace variablelabel = "Local Government" if variable == "presponsibility_lga"
-	replace variablelabel = "National Government" if variable == "presponsibility_natl"
-
+	replace variablelabel = "Local Gov." if variable == "ptrust_lga"
+	replace variablelabel = "Nat'l Gov." if variable == "ptrust_natl"
+	replace variablelabel = "Radio" if variable == "ptrust_radio"
+	replace variablelabel = "Religion" if variable == "ptrust_relig"		
+		
 
 /* Create variables ____________________________________________________________*/
 
@@ -128,7 +131,7 @@ texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 texdoc write 	\begin{tabular}{l*{16}{c}}
 texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	
 
-texdoc write    							& 					&   \multicolumn{3}{c}{Government}  \tstrut \bstrut \\ \cmidrule(r){2-2} \cmidrule(r){3-5} 
+texdoc write    							& 	\multicolumn{4}{c}{Who do you trust most?}  \tstrut \bstrut \\ \cmidrule(r){2-5} 
 
 texdoc write    							& $var1				& $var2    		& $var3 		& $var4 			\\ 
 texdoc write 	\hline
