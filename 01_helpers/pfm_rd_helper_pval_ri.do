@@ -19,6 +19,7 @@ if "$test" == "onesided" {
 			if ${coef} < `coef_ri' { 	  
 					local rip_count = `rip_count' + 1	
 			}
+	di "${dv} - `j'"
 	}	
 }
 
@@ -36,6 +37,7 @@ if "$test" == "twosided" {
 			if abs(${coef}) < abs(`coef_ri') { 	  
 				local rip_count = `rip_count' + 1	
 			}
+	di "${dv} - `j'"
 	}
 }
 	
