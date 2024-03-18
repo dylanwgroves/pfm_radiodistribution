@@ -24,7 +24,7 @@ ________________________________________________________________________________
 
 /* Load Data ___________________________________________________________________*/	
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_practice.xlsx", sheet("topics") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all_sb.xlsx", sheet("topics") firstrow clear
 	cap rename A variable
 	save `dta_main', replace
 	

@@ -54,9 +54,8 @@ ________________________________________________________________________________
 	# d ;
 	local sumstat_vars 	
 						presponsibility_vill
-						presponsibility_gov
-						presponsibility_lga
 						presponsibility_natl
+						presponsibility_lga
 						;
 	#d cr 
 
@@ -76,12 +75,12 @@ ________________________________________________________________________________
 	
 /* Variable lables _____________________________________________________________*/
 	
-	replace variablelabel = "Villagers" if variable == "presponsibility_vill"
-		replace ripval = 1 - pval if variable == "presponsibility_vill"
-	replace variablelabel = "Gov. index" if variable == "presponsibility_gov"
-	replace variablelabel = "Local Gov." if variable == "presponsibility_lga"
-	replace variablelabel = "National Gov." if variable == "presponsibility_natl"
-		replace ripval = pval if variable != "presponsibility_vill"
+	replace variablelabel = "Villagers" if variable == 		"presponsibility_vill"
+		replace ripval = 1 - pval if variable == 			"presponsibility_vill"
+	replace variablelabel = "Gov. index" if variable == 	"presponsibility_gov"
+	replace variablelabel = "Local Gov." if variable == 	"presponsibility_lga"
+	replace variablelabel = "National Gov." if variable == 	"presponsibility_natl"
+		replace ripval = pval if variable != 				"presponsibility_vill"
 
 
 /* Create variables ____________________________________________________________*/
@@ -133,22 +132,22 @@ texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 texdoc write 	\begin{tabular}{l*{16}{c}}
 texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	
 
-texdoc write    							& 	\multicolumn{4}{c}{Who has primary responsibility for development?}  \tstrut \bstrut \\ \cmidrule(r){2-2} \cmidrule(r){3-5} 
+texdoc write    							& 	\multicolumn{4}{c}{Who has primary responsibility for development?}  \tstrut \bstrut \\ \cmidrule(r){2-5} 
 
-texdoc write    							& $var1				& $var2    		& $var3 		& $var4 			\\ 
+texdoc write    							& $var1				& $var2    		& $var3 		\\ 
 texdoc write 	\hline
-texdoc write 	Treatment      				& $b1\sym{$s1}   	& $b2\sym{$s2}  & $b3\sym{$s3} 	& $b4\sym{$s4}		\\
-texdoc write    Standard Error 				& $se1				& $se2    		& $se3 			& $se4 				\\
+texdoc write 	Treatment      				& $b1\sym{$s1}   	& $b2\sym{$s2}  & $b3\sym{$s3} 	\\
+texdoc write    Standard Error 				& $se1				& $se2    		& $se3 			\\
 texdoc write 	\hline
-texdoc write 	RI \$p\$-value 				& $p1				& $p2			& $p3  			& $p4				\\
-texdoc write 	Hypothesis					& +/-					& +				& +				& +					\\
-texdoc write 	Control Mean      			& $c1				& $c2			& $c3  			& $c4				\\
-texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			& $sd4				\\
-texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	& [$mn4-$mx4]		\\	
-texdoc write 	Blocked FE 					& Yes 				&  Yes   		& Yes			& Yes				\\
-texdoc write 	Controls 					& $ctl1 			&  $ctl2   		& $ctl3			& $ctl4				\\
-texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2   		& $r3			& $r4				\\
-texdoc write 	Observations      			& $n1 				& $n2   		& $n3			& $n4				\\
+texdoc write 	RI \$p\$-value 				& $p1				& $p2			& $p3  			\\
+texdoc write 	Hypothesis					& +/-					& +				& +				\\
+texdoc write 	Control Mean      			& $c1				& $c2			& $c3  			\\
+texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			\\
+texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	\\	
+texdoc write 	Blocked FE 					& Yes 				&  Yes   		& Yes			\\
+texdoc write 	Controls 					& $ctl1 			&  $ctl2   		& $ctl3			\\
+texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2   		& $r3			\\
+texdoc write 	Observations      			& $n1 				& $n2   		& $n3			\\
 texdoc write 	\Xhline{2\arrayrulewidth}
 texdoc write 	\end{tabular}
 texdoc write 	}

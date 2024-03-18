@@ -53,8 +53,8 @@ ________________________________________________________________________________
 	/* Individual Data */
 	# d ;
 	local sumstat_vars 	
-						ptrust_lga
 						ptrust_natl
+						ptrust_lga
 						ptrust_relig
 						ptrust_radio
 						;
@@ -76,10 +76,10 @@ ________________________________________________________________________________
 	
 /* Variable lables _____________________________________________________________*/
 	
-	replace variablelabel = "Local Gov." if variable == "ptrust_lga"
-	replace variablelabel = "Nat'l Gov." if variable == "ptrust_natl"
-	replace variablelabel = "Radio" if variable == "ptrust_radio"
-	replace variablelabel = "Religion" if variable == "ptrust_relig"		
+	replace variablelabel = "Local Gov." if variable == 		"ptrust_lga"
+	replace variablelabel = "National Gov." if variable == 		"ptrust_natl"
+	replace variablelabel = "Radio" if variable == 				"ptrust_radio"
+	replace variablelabel = "Religion" if variable == 			"ptrust_relig"		
 		
 
 /* Create variables ____________________________________________________________*/

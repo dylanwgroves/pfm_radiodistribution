@@ -40,6 +40,7 @@ ________________________________________________________________________________
 /* Load Data ___________________________________________________________________*/	
 
 	use "${user}\Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis.dta", clear
+	
 
 /* Define Parameters ___________________________________________________*/
 
@@ -50,7 +51,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	800
+		global rerandcount	1
 							;
 		
 		
@@ -74,7 +75,7 @@ ________________________________________________________________________________
 					
 		/* Indices */			
 		global index_list	
-							ptrust
+							covars
 							/*
 							covars
 							comply 
@@ -176,7 +177,7 @@ foreach index of global index_list {
 				
 		/* Set Put Excel File Name */
 		putexcel clear
-		putexcel set "${user}\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}.xlsx", sheet(`index', replace) modify
+		putexcel set "${user}\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}_sb.xlsx", sheet(`index', replace) modify
 		
 		qui putexcel A1 = ("variable")
 		qui putexcel B1 = ("variablelabel")
@@ -286,7 +287,7 @@ foreach index of global index_list {
 			do "${user}/Documents/pfm_radiodistribution/01_helpers/pfm_rd_helper_pval_ri.do"
 			global ripval = ${helper_ripval}
 	  
-	/* Lasso Regression  _______________________________________________________*/
+	/* Lasso Regression  _______________________________________________________
 	
 		use "${user}\Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis_prepped.dta", clear
 	
@@ -327,7 +328,7 @@ foreach index of global index_list {
 	
 		** Capture time
 		global date = c(current_date)
-		
+	*/	
 	/* Export to Excel _________________________________________________________*/ 
 		
 		di "Variable is ${varname}, coefficient is ${coef}, pval is ${pval} / ripval is ${ripval}, N = ${n}"

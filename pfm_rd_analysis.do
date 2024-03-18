@@ -40,7 +40,7 @@ ________________________________________________________________________________
 /* Load Data ___________________________________________________________________*/	
 
 	use "${user}\Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis.dta", clear
-	
+	stop
 
 /* Define Parameters ___________________________________________________*/
 
@@ -51,7 +51,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	1
+		global rerandcount	800
 							;
 		
 		
@@ -75,29 +75,7 @@ ________________________________________________________________________________
 					
 		/* Indices */			
 		global index_list	
-							firststage
-							stations
-							topics
-							gender
-							wpp
-							ipv
-							em
-							open_nbr
-							open_marry
-							open_thermo
-							identity
-							ppart
-							pknow 
-							presponsibility
 							ptrust
-							crime
-							crime_report 
-							ccm
-							enviroknow 
-							hivknow
-							healthknow
-							hivdisclose
-							hivstigma
 							/*
 							covars
 							comply 
@@ -199,7 +177,7 @@ foreach index of global index_list {
 				
 		/* Set Put Excel File Name */
 		putexcel clear
-		putexcel set "${user}\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}_sb.xlsx", sheet(`index', replace) modify
+		putexcel set "${user}\Dropbox\Wellspring Tanzania Papers\Wellspring Tanzania - Radio Distribution\03 Tables and Figures/pfm_rd_analysis_${survey}_${sample}.xlsx", sheet(`index', replace) modify
 		
 		qui putexcel A1 = ("variable")
 		qui putexcel B1 = ("variablelabel")

@@ -26,17 +26,27 @@ ________________________________________________________________________________
 
 /* Set table name ______________________________________________________________*/
 
-	local tablename "${rd_clean_tables}/pfm_rd_tables_results_ptrust.tex"
+	local tablename "${rd_clean_tables}/pfm_rd_tables_results_nationalid.tex"
 	
 	
 /* Load Data ___________________________________________________________________*/	
 
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("ptrust") firstrow clear
-		cap rename A variable 
-
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("identity") firstrow clear
+	cap rename A variable
 	save `dta_main', replace
 	
+
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("open_thermo") firstrow clear
+	cap rename A variable
+	append using `dta_main', force
+	save `dta_main', replace
+
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("open_marry") firstrow clear
+	cap rename A variable
+	append using `dta_main', force
+	save `dta_main', replace
+
 
 /* Sort Data ___________________________________________________________________*/
 
@@ -53,14 +63,15 @@ ________________________________________________________________________________
 	/* Individual Data */
 	# d ;
 	local sumstat_vars 	
-						ptrust_natl
-						ptrust_lga
-						ptrust_relig
-						ptrust_radio
-						;
+					identity_tzovertribe_dum
+					open_kidmarry_index
+					open_kidmarry_difftribe
+					open_kidmarry_diffrelig
+					open_thermo_index
+					open_thermo_notrelig
+					open_thermo_nottribe
+					;
 	#d cr 
-
-	tostring variablelabel, replace
 
 	gen rank = .
 	local i = 1
@@ -76,11 +87,15 @@ ________________________________________________________________________________
 	
 /* Variable lables _____________________________________________________________*/
 	
-	replace variablelabel = "Local Gov." if variable == 		"ptrust_lga"
-	replace variablelabel = "National Gov." if variable == 		"ptrust_natl"
-	replace variablelabel = "Radio" if variable == 				"ptrust_radio"
-	replace variablelabel = "Religion" if variable == 			"ptrust_relig"		
-		
+	tostring variablelabel, replace
+	replace variablelabel = "Index" if variable == 					"identity_tzovertribe_dum"
+	replace variablelabel = "Index" if variable == 					"open_kidmarry_index"
+	replace variablelabel = "Tribe" if variable == 					"open_kidmarry_difftribe"
+	replace variablelabel = "Religion" if variable == 				"open_kidmarry_diffrelig"
+	replace variablelabel = "Index" if variable == 					"open_thermo_index"
+	replace variablelabel = "Tribe" if variable == 					"open_thermo_notrelig"
+	replace variablelabel = "Religion" if variable == 				"open_thermo_nottribe"
+
 
 /* Create variables ____________________________________________________________*/
 
@@ -128,29 +143,28 @@ texdoc init "`tablename'", replace nolog
 
 texdoc write 	{
 texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-texdoc write 	\begin{tabular}{l*{16}{c}}
-texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	
-
-texdoc write    							& 	\multicolumn{4}{c}{Who do you trust most?}  \tstrut \bstrut \\ \cmidrule(r){2-5} 
-
-texdoc write    							& $var1				& $var2    		& $var3 		& $var4 			\\ 
+texdoc write 	\begin{tabular}{l*{8}{c}}
+texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	 	
+texdoc write   								&					&	\multicolumn{3}{c}{Kid can marry someone of diff...} &	\multicolumn{3}{c}{Feeling thermo. of different....}	\\ \cmidrule(r){3-5} \cmidrule(r){5-8} 
+texdoc write        	     				& $var1 			& $var2			& $var3 			& $var4					& $var5 			& $var6 			& $var7				\tstrut \bstrut  \\
 texdoc write 	\hline
-texdoc write 	Treatment      				& $b1\sym{$s1}   	& $b2\sym{$s2}  & $b3\sym{$s3} 	& $b4\sym{$s4}		\\
-texdoc write    Standard Error 				& $se1				& $se2    		& $se3 			& $se4 				\\
+texdoc write 	Treatment     				& $b1\sym{$s1}  	& $b2\sym{$s2} 	& $b3\sym{$s3} 		& $b4\sym{$s4}			& $b5\sym{$s5} 		& $b6\sym{$s6}		& $b7\sym{$s7}			\\
+texdoc write    Standard Error 				& $se1				& $se2			& $se3    			& $se4  				& $se5 				& $se6 				& $se7 					\\
 texdoc write 	\hline
-texdoc write 	RI \$p\$-value 				& $p1				& $p2			& $p3  			& $p4				\\
-texdoc write 	Hypothesis					& +					& +				& +				& +					\\
-texdoc write 	Control Mean      			& $c1				& $c2			& $c3  			& $c4				\\
-texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			& $sd4				\\
-texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	& [$mn4-$mx4]		\\	
-texdoc write 	Blocked FE 					& Yes 				&  Yes   		& Yes			& Yes				\\
-texdoc write 	Controls 					& $ctl1 			&  $ctl2   		& $ctl3			& $ctl4				\\
-texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2   		& $r3			& $r4				\\
-texdoc write 	Observations      			& $n1 				& $n2   		& $n3			& $n4				\\
+texdoc write 	RI \$p\$-value 				& $p1				& $p2 			& $p3				& $p4					& $p5 				& $p6  				& $p7  					\\
+texdoc write 	Hypothesis					& \textbf{+}		& \textbf{+} 	& \textbf{+}		& \textbf{+} 			& \textbf{+}		& \textbf{+}		& \textbf{+}			\\
+texdoc write 	Control Mean      			& $c1				& $c2			& $c3 				& $c4					& $c5  				& $c6  				& $c7  					\\
+texdoc write 	Control SD					& $sd1				& $sd2			& $sd3				& $sd4					& $sd5 				& $sd6				& $sd7					\\
+texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2] 	& [$mn3-$mx3]		& [$mn4-$mx4]			& [$mn5-$mx5] 		& [$mn6-$mx6] 		& [$mn7-$mx7]			\\	
+texdoc write 	Blocked FE 					& Yes 				& Yes 			&  Yes   			& Yes  					& Yes				& Yes				& Yes					\\
+texdoc write 	Controls 					& No 				& No 			&  No   			& No  					& No				& No				& No					\\
+texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2 			& $r3   			& $r4 					& $r5				& $r6				& $r7					\\
+texdoc write 	Observations      			& $n1 				& $n2 			& $n3   			& $n4 					& $n5				& $n6				& $n7					\\
 texdoc write 	\Xhline{2\arrayrulewidth}
 texdoc write 	\end{tabular}
 texdoc write 	}
 
+texdoc close
 texdoc close
 
 

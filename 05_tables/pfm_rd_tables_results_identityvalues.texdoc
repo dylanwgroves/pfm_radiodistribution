@@ -22,12 +22,18 @@ ________________________________________________________________________________
 	do "${code}/pfm_ne/pfm_ne_prelim.do"
 */
 
+/* Set table name ______________________________________________________________*/
+
+	local tablename "${rd_clean_tables}/pfm_rd_tables_results_identityvalues.tex"
+	
 /* Load Data ___________________________________________________________________*/	
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("comply") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all_sb.xlsx", sheet("identity") firstrow clear
+	cap rename A variable
 	save `dta_main', replace
 	
-	import excel "${rd_tables}/pfm_rd_analysis_main_practice.xlsx", sheet("firststage") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all_sb.xlsx", sheet("values") firstrow clear
+	cap rename A variable
 	append using `dta_main', force
 	save `dta_main', replace
 
@@ -48,11 +54,16 @@ ________________________________________________________________________________
 /* Create Rank _________________________________________________________________*/
 
 	/* Individual Data */
-	local sumstat_vars 	rd_receive ///
-						rd_stillhave ///
-						rd_radio_3months_dum ///
-						rd_radio_2wks_dum ///
-						rd_radio_1day_dum 
+	# d ;
+	local sumstat_vars 
+						identity_tzovertribe_dum
+						identity_religiosity
+						values_urbangood
+						values_conformity
+						values_questionauthority
+						;
+	#d cr 
+
 
 	gen rank = .
 	local i = 1
@@ -68,11 +79,11 @@ ________________________________________________________________________________
 	
 /* Variable lables _____________________________________________________________*/
 	
-	replace variablelabel = "Received?" if variable == "rd_receive"
-	replace variablelabel = "Still have?" if variable == "rd_stillhave"
-	replace variablelabel = "3 months" if variable == "rd_radio_3months_dum"
-	replace variablelabel = "2 weeks" if variable == "rd_radio_2wks_dum"
-	replace variablelabel = "1 day" if variable == "rd_radio_1day_dum"
+	replace variablelabel = "TZ > Tribe" if variable == "identity_tzovertribe_dum"
+	replace variablelabel = "Religiosity" if variable == "identity_religiosity"
+	replace variablelabel = "Urb. Mig." if variable == "values_urbangood"
+	replace variablelabel = "Non-conformity" if variable == "values_conformity"
+	replace variablelabel = "Q Leaders" if variable == "values_questionauthority"
 
 /* Create variables ____________________________________________________________*/
 	
@@ -88,8 +99,8 @@ ________________________________________________________________________________
 		global var`i' = variablelabel[`i']
 		global b`i' = strofreal(coef[`i'], "%6.3f")
 		global se`i' = strofreal(se[`i'], "%6.3f")
-		global p`i' = strofreal(ripval[`i'], "%6.3f")
-		global p`i'c = strofreal(lasso_ripval[`i'], "%6.3f")
+		global p`i' = strofreal(pval[`i'], "%6.3f")
+		global p`i'c = strofreal(lasso_pval[`i'], "%6.3f")
 		global c`i' = strofreal(ctl_mean[`i'], "%6.2f")
 		global sd`i' = strofreal(ctl_sd[`i'], "%6.2f")
 		global mn`i' = strofreal(min[`i'], "%6.0f")
@@ -105,20 +116,20 @@ ________________________________________________________________________________
 
 /* Make Table __________________________________________________________________*/
 
-texdoc init "${rd_clean_tables}/pfm_rd_tables_firststage.tex", replace nolog
+texdoc init "`tablename'", replace nolog
 
 texdoc write 	{
 texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 texdoc write 	\begin{tabular}{l*{8}{c}}
 texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	 	
-texdoc write   								&\multicolumn{2}{c}{Uptake}			&\multicolumn{3}{c}{Listened to any radio in...} 									\\ \cmidrule(r){2-3} \cmidrule(l){4-6}		 
+texdoc write   								&\multicolumn{2}{c}{Identity}			&\multicolumn{3}{c}{Values} 											\\ \cmidrule(r){2-3} \cmidrule(l){4-6}		 
 texdoc write        	     				& $var1 			& $var2			& $var3 			& $var4					& $var5 						\tstrut \bstrut  \\
 texdoc write 	\hline
 texdoc write 	Treatment     				& $b1\sym{$s1}  	& $b2\sym{$s2} 	& $b3\sym{$s3} 		& $b4\sym{$s4}			& $b5\sym{$s5} 					\\
 texdoc write    Standard Error 				& $se1				& $se2			& $se3    			& $se4  				& $se5 							\\
 texdoc write 	\hline
 texdoc write 	RI \$p\$-value 				& $p1				& $p2 			& $p3				& $p4					& $p5  							\\
-texdoc write 	Hypothesis					& \textbf{+}		& \textbf{+} 	& \textbf{+}		& \textbf{+} 			& \textbf{+}					\\
+texdoc write 	Hypothesis					& \textbf{+}		& \textbf{+/-} 	& \textbf{+/-}		& \textbf{+/-} 			& \textbf{+/-}					\\
 texdoc write 	Control Mean      			& $c1				& $c2			& $c3 				& $c4					& $c5  							\\
 texdoc write 	Control SD					& $sd1				& $sd2			& $sd3				& $sd4					& $sd5 							\\
 texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2] 	& [$mn3-$mx3]		& [$mn4-$mx4]			& [$mn5-$mx5] 					\\	

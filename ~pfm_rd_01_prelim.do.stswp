@@ -1202,6 +1202,14 @@ ________________________________________________________________________________
 			replace wpp_attitude2_dum = cm3_wpp_attitude2_dum if missing(wpp_attitude2_dum) // cm3
 		tab wpp_attitude2_dum sample, m
 		
+		cap drop e_wpp_behavior_self_short 
+		gen e_wpp_behavior_self_short = .
+			replace e_wpp_behavior_self_short = 1 if e_wpp_behavior_self == 3 | e_wpp_behavior_self == 2
+			replace e_wpp_behavior_self_short = 0 if e_wpp_behavior_self == 1 | e_wpp_behavior_self == 0
+
+		drop e_wpp_behavior_adult
+		egen e_wpp_behavior_adult = rowmean(e_wpp_behavior_wife e_wpp_behavior_self_short)
+		
 		foreach var in 	wpp_behavior_self wpp_behavior_wife wpp_behavior_adult  ///
 						wpp_behavior_self_short  {
 							
@@ -1263,12 +1271,12 @@ ________________________________________________________________________________
 			replace open_thermo_notrelig = e_prej_thermo_christians if b_resp_muslim == 1 & missing(open_thermo_notrelig) // ne + as1 
 			*replace open_thermo_notrelig = e_prej_thermo_muslims if b_resp_muslim != 1 & missing(open_thermo_notrelig) // as1 
 			*replace open_thermo_notrelig = e_prej_thermo_christians if b_resp_muslim == 1 & missing(open_thermo_notrelig) // as1 
-			
+stop			
 		gen sb_sambaa = e_prej_thermo_sambaa if b_resp_tribe_sambaa != 1 
 		gen sb_digo = e_prej_thermo_digo if b_resp_tribe_digo != 1 
 		
 		egen open_thermo_nottribe = rowmean(sb_sambaa sb_digo)
-		
+
 		egen open_thermo_index = rowmean(open_thermo_notrelig open_thermo_nottribe)
 		
 		replace open_thermo_nottribe = open_thermo_nottribe/100 
@@ -1344,9 +1352,8 @@ ________________________________________________________________________________
 		*clonevar crime_vote = vote_crime 
 		egen crime_local_long = rowmean(e_crime_local cm3_crime_local)
 			gen crime_local = crime_local_long/3
-		egen crime_natl_long = rowmean(e_crime_natl cm3_crime_natl)
-			gen crime_natl = crime_natl_long/3
-		
+		egen crime_natl = rowmean(e_crime_natl cm3_crime_natl)
+
 		gen crime_bodarisky = e_gbv_boda_risky_short
 		gen crime_travelrisky = e_gbv_travel_risky_short
 		
@@ -1382,6 +1389,8 @@ ________________________________________________________________________________
 		rename e_hivknow_* hivknow_*
 		rename e_healthknow_* healthknow_*
 		
+		egen healthknow_index = rowmean(healthknow_notradmed healthknow_nowitchcraft healthknow_vaccines healthknow_vaccines_imp)
+		
 	* hiv disclosure 
 		rename e_hivdisclose_* hivdisclose_* 
 		
@@ -1392,6 +1401,9 @@ ________________________________________________________________________________
 		rename e_em_* em_* 
 		rename e_fm_* fm_* 
 		rename e_ptixpref_rank_efm ptixpref_rank_efm
+		
+	* values 
+		rename e_values_* values_*
 
 	* deal with missingness in covariates: replace -999/-888 to . and set any missingness
 	* to village mean
@@ -1425,6 +1437,7 @@ ________________________________________________________________________________
 				${ccm} ${em}  ///
 				${hivknow} ${healthknow} ///
 				${hivdisclose} ${hivstigma} ///
+				${values}
 				
 		
 	

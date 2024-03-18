@@ -224,6 +224,7 @@ ________________________________________________________________________________
 
 							
 		global healthknow 	
+							healthknow_index
 							healthknow_notradmed 
 							healthknow_nowitchcraft 
 							healthknow_vaccines 
