@@ -79,6 +79,13 @@ ________________________________________________________________________________
 	replace variablelabel = "Know about" if variable == 				"healthknow_vaccines"
 	replace variablelabel = "Think imp." if variable == 				"healthknow_vaccines_imp"
 
+	
+/* Quick variable fix __________________________________________________________*/
+
+	replace coef = coef*-1 if variable == "healthknow_notradmed" | variable == "healthknow_nowitchcraft"
+	replace ctl_mean = 1-ctl_mean if variable == "healthknow_notradmed" | variable == "healthknow_nowitchcraft"
+	*replace pval = 1-pval if variable != "healthknow_nowitchcraft"
+	
 
 /* Create variables ____________________________________________________________*/
 
@@ -129,7 +136,7 @@ texdoc write 	\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
 texdoc write 	\begin{tabular}{l*{16}{c}}
 texdoc write 	\Xhline{2\arrayrulewidth}\addlinespace[3pt]	
 
-texdoc write    							& 					&  \multicolumn{2}{c}{Reject Alt. Med.} & \multicolumn{2}{c}{Vaccines} \tstrut \bstrut \\ \cmidrule(r){3-4} \cmidrule(r){5-6} 
+texdoc write    							& 					&  \multicolumn{2}{c}{Alternative Medicines} & \multicolumn{2}{c}{Vaccines} \tstrut \bstrut \\ \cmidrule(r){3-4} \cmidrule(r){5-6} 
 
 texdoc write    							& $var1				& $var2    		& $var3 		& $var4 		& $var5			\\ 
 texdoc write 	\hline
@@ -143,8 +150,8 @@ texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			& $sd4			& $sd5			\\
 texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	& [$mn4-$mx4]	& [$mn5-$mx5] 	\\	
 texdoc write 	Blocked FE 					& Yes 				&  Yes   		& Yes			& Yes			& Yes			\\
 texdoc write 	Controls 					& $ctl1 			&  $ctl2   		& $ctl3			& $ctl4			& $ctl5			\\
-texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2   		& $r3			& $r4			& $r6			\\
-texdoc write 	Observations      			& $n1 				& $n2   		& $n3			& $n4			& $n6			\\
+texdoc write 	Adj-\$ R^2\$				& $r1 				& $r2   		& $r3			& $r4			& $r5			\\
+texdoc write 	Observations      			& $n1 				& $n2   		& $n3			& $n4			& $n5			\\
 texdoc write 	\Xhline{2\arrayrulewidth}
 texdoc write 	\end{tabular}
 texdoc write 	}

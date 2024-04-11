@@ -54,7 +54,8 @@ ________________________________________________________________________________
 	
 	* national id 
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_nationalid.texdoc"
-	
+	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_nationalid_short.texdoc"
+
 	
 	* crime 
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_crime.texdoc"
@@ -62,7 +63,6 @@ ________________________________________________________________________________
 	
 	* knowledge
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_enviroknow.texdoc"
-	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_healthknow.texdoc"
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_healthknow.texdoc"
 	texdoc do "${code}/pfm_radiodistribution/05_tables/pfm_rd_tables_results_hivknow.texdoc"
 	

@@ -1186,6 +1186,8 @@ ________________________________________________________________________________
 		*rename ipv_report e_ipv_report
 		egen ipv_report = rowmean(e_ipv_report e_ipv_report_index)
 		tab ipv_report sample, m
+		
+		egen ipv_index = rowmean(ipv_reject_index ipv_norm_rej ipv_report)
 	
 	* wpp 
 		rename e_wpp_behavior wpp_behavior
@@ -1271,7 +1273,7 @@ ________________________________________________________________________________
 			replace open_thermo_notrelig = e_prej_thermo_christians if b_resp_muslim == 1 & missing(open_thermo_notrelig) // ne + as1 
 			*replace open_thermo_notrelig = e_prej_thermo_muslims if b_resp_muslim != 1 & missing(open_thermo_notrelig) // as1 
 			*replace open_thermo_notrelig = e_prej_thermo_christians if b_resp_muslim == 1 & missing(open_thermo_notrelig) // as1 
-stop			
+		
 		gen sb_sambaa = e_prej_thermo_sambaa if b_resp_tribe_sambaa != 1 
 		gen sb_digo = e_prej_thermo_digo if b_resp_tribe_digo != 1 
 		
@@ -1365,8 +1367,8 @@ stop
 		
 		egen crime_safebehavior_index = rowmean(crime_nopartyalone crime_walklongway)
 		
-		egen crime_index = rowmean(crime_ppref crime_local crime_natl crime_risky crime_safebehavior_index)
-	
+		egen crime_index = rowmean(crime_ppref crime_local crime_natl crime_risky)
+
 	* crime report (not panalysis)
 		egen crime_gbv_report = rowmean(e_gbv_response_gov cm3_gbv_response_gov)
 		egen crime_gbv_testify = rowmean(e_gbv_testify cm3_gbv_testify)
@@ -1389,6 +1391,12 @@ stop
 		rename e_hivknow_* hivknow_*
 		rename e_healthknow_* healthknow_*
 		
+		drop hivknow_arv_nospread
+		egen hivknow_arv_nospread = rowmax(e_s_hiv_nospread_1 e_s_hiv_nospread_2) // ARVs and condoms
+	
+		drop hivknow_index 
+		egen hivknow_index = rowmean(hivknow_arv_survive hivknow_arv_nospread hivknow_transmit)
+		
 		egen healthknow_index = rowmean(healthknow_notradmed healthknow_nowitchcraft healthknow_vaccines healthknow_vaccines_imp)
 		
 	* hiv disclosure 
@@ -1401,7 +1409,13 @@ stop
 		rename e_em_* em_* 
 		rename e_fm_* fm_* 
 		rename e_ptixpref_rank_efm ptixpref_rank_efm
+		replace ptixpref_rank_efm = (ptixpref_rank_efm-1)/8
+		egen em_index = rowmean(fm_reject em_reject_index ptixpref_rank_efm em_norm_reject_dum em_record_shareany)
 		
+	* all gender
+	
+		egen gender_all = rowmean(em_index ge_index wpp_index)
+	
 	* values 
 		rename e_values_* values_*
 
@@ -1424,7 +1438,7 @@ stop
 			
 			tab `var', m
 		}
-
+stop
 	* decide what to keep 	
 		keep 	all community covars sample block ///
 				${treat_vars} ${covars} ${comply} ${firststage} radio_stations_* radio_type_* ///
@@ -1437,7 +1451,7 @@ stop
 				${ccm} ${em}  ///
 				${hivknow} ${healthknow} ///
 				${hivdisclose} ${hivstigma} ///
-				${values}
+				${values} gender_all ipv_index em_index treat
 				
 		
 	

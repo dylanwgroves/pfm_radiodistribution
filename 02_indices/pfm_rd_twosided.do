@@ -3,7 +3,7 @@
 
 	#d ;
 	global twosided 	
-					identity_religiosity
+					identity_
 					ipv_norm_rej
 					values_urbangood 
 					resp_religiosity

@@ -29,7 +29,7 @@ ________________________________________________________________________________
 /* Load Data ___________________________________________________________________*/	
 
 
-	import excel "${rd_tables}/pfm_rd_analysis_main_all_sb.xlsx", sheet("heahknow") firstrow clear
+	import excel "${rd_tables}/pfm_rd_analysis_main_all.xlsx", sheet("hivknow") firstrow clear
 	cap rename A variable
 	save `dta_main', replace
 	
@@ -135,7 +135,7 @@ texdoc write 	Treatment      				& $b1\sym{$s1}   	& $b2\sym{$s2}  & $b3\sym{$s3
 texdoc write    Standard Error 				& $se1				& $se2    		& $se3 			& $se4 			\\
 texdoc write 	\hline
 texdoc write 	RI \$p\$-value 				& $p1				& $p2			& $p3  			& $p4			\\
-texdoc write 	Hypothesis					& +					& +				& +				& +				\\
+texdoc write 	Hypothesis					& +/-				& +/-			& +/-			& +/-				\\
 texdoc write 	Control Mean      			& $c1				& $c2			& $c3  			& $c4			\\
 texdoc write 	Control SD 					& $sd1				& $sd2			& $sd3 			& $sd4			\\
 texdoc write	DV Range					& [$mn1-$mx1]		& [$mn2-$mx2]	& [$mn3-$mx3] 	& [$mn4-$mx4]	\\	
