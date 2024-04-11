@@ -40,7 +40,7 @@ ________________________________________________________________________________
 /* Load Data ___________________________________________________________________*/	
 
 	use "${user}\Dropbox/Wellspring Tanzania Papers/Wellspring Tanzania - Radio Distribution/01 Data/pfm_rd_analysis.dta", clear
-	stop
+
 
 /* Define Parameters ___________________________________________________*/
 
@@ -51,7 +51,7 @@ ________________________________________________________________________________
 							;
 							
 		/* rerandomization count */
-		global rerandcount	800
+		global rerandcount	0
 							;
 		
 		
@@ -74,8 +74,7 @@ ________________________________________________________________________________
 							*/
 					
 		/* Indices */			
-		global index_list	
-							ptrust
+		global index_list	hivknow
 							/*
 							covars
 							comply 
@@ -97,7 +96,7 @@ ________________________________________________________________________________
 							crime
 							crime_report 
 							ccm
-							enviroknow 
+							enviroknow 	
 							hivknow
 							healthknow
 							hivdisclose
